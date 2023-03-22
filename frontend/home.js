@@ -4,7 +4,6 @@
  * Description: This file contains the code for the home page of the website.
  *             It is the first page that the user will see when they visit the website.
  */
-const bcrypt = require('bcryptjs');
 
 // function to return an array of the most common passwords from a text file
 const getPasswords = async () => {
@@ -28,8 +27,8 @@ const getRegistration = async () => {
     console.log(isPasswordCommon(password, pwdArray));
 
     // use bcrypt to hash the password
-    let salt = bcrypt.syngenSaltSync(10);
-    let hash = bcrypt.hashSync(password, salt);
+    //let salt = bcrypt.syngenSaltSync(10);
+    //let hash = bcrypt.hashSync(password, salt);
 
     // send user details to database with use of fetch API
     fetch('/register', {

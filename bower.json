@@ -1,0 +1,17 @@
+{
+  "name": "bower",
+  "description": "secure software project",
+  "main": "index.js",
+  "authors": [
+    "harvey1344 <harvey.thompson2001@gmail.com>"
+  ],
+  "license": "ISC",
+  "homepage": "https://github.com/harvey1344/DSS",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
