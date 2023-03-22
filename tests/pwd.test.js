@@ -1,9 +1,19 @@
+/*
+ * Author: Harvey Thompson
+ * Date: 20/03/2023
+ * Description: This file contains the code testing the user sign up functions
+ *              basically the password strength and common password checks.
+ *              TODO: add test for encryption of password
+ * N.B.         To run this file use command npm run pwd-test
+ *
+ */
+
 const assert = require('assert');
 const {
     getPasswords,
     isPasswordCommon,
     isPasswordStrong,
-} = require('./frontend/home.js');
+} = require('../frontend/home.js');
 
 describe('getPasswords', () => {
     it('should return an array of passwords', async () => {

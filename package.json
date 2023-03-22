@@ -4,7 +4,7 @@
   "description": "secure software project",
   "main": "index.js",
   "scripts": {
-     "test": "mocha"
+     "pwd-test": "mocha ./tests/pwd.test.js"
   },
   "author": "",
   "license": "ISC",
