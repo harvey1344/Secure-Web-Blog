@@ -24,12 +24,20 @@ const getRegistration = async () => {
     console.log(typeof password);
 
     // check if password is common
-    console.log(isPasswordCommon(password, pwdArray));
+    if (isPasswordCommon(password, pwdArray)) {
+        alert('Password is too common');
+        return;
+    }
+    if (!isPasswordStrong(password)) {
+        alert('Password is not strong enough');
+        return;
+    }
 
-    // use bcrypt to hash the password
-    //let salt = bcrypt.syngenSaltSync(10);
-    //let hash = bcrypt.hashSync(password, salt);
-
+    // salt the password before hashing
+    // appened salt after pwd
+    const salt = generateSalt(10);
+    const saltedPassword = password + salt; // concatenate password and salt
+    const hash = CryptoJS.SHA256(saltedPassword).toString();
     // send user details to database with use of fetch API
     fetch('/register', {
         // Adding method type
@@ -37,14 +45,21 @@ const getRegistration = async () => {
         // Adding body or contents to send
         body: JSON.stringify({
             email,
-            password,
+            hash,
+            salt,
         }),
         // Adding headers to the request
         headers: {
             'Content-type': 'application/json; charset=UTF-8',
         },
     }).then(function (res) {
-        console.log(res);
+        if (res.ok) {
+            // Registration successful
+            showSuccessAlert();
+        } else {
+            // Registration failed
+            alert('Email address already registered');
+        }
     });
 };
 
@@ -77,6 +92,33 @@ const isPasswordStrong = (password) => {
 
     // If all checks pass, return true
     return true;
+};
+
+function showSuccessAlert() {
+    // Show the alert
+    var alertBox = document.getElementById('alert');
+    alertBox.style.display = 'block';
+
+    // Hide the alert after 3 seconds
+    setTimeout(function () {
+        alertBox.style.display = 'none';
+        window.location.href = '/login';
+    }, 3000);
+}
+
+function closeAlert() {
+    var alertBox = document.getElementById('alert');
+    alertBox.style.display = 'none';
+}
+
+const generateSalt = (length) => {
+    var chars =
+        '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    var salt = '';
+    for (var i = 0; i < length; i++) {
+        salt += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return salt;
 };
 
 module.exports.getPasswords = getPasswords;

@@ -11,9 +11,16 @@ app.use(express.json());
 app.use(cors());
 
 // express routers
+app.get('/hashing', (req, res) => {
+    res.sendFile('bower_components/crypto-js/crypto-js.js', { root: '../' });
+});
 
 app.get('/', (req, res) => {
     res.sendFile('home.html', { root: '../frontend' });
+});
+
+app.get('/login', (req, res) => {
+    res.sendFile('login.html', { root: '../frontend' });
 });
 
 app.get('/main.css', function (req, res) {
