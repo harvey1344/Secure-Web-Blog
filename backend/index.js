@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const users = require('./users');
+const login = require('./login');
 
 // set up server
 const PORT = 5000;
@@ -15,20 +16,14 @@ app.get('/hashing', (req, res) => {
     res.sendFile('bower_components/crypto-js/crypto-js.js', { root: '../' });
 });
 
-app.get('/', (req, res) => {
-    res.sendFile('home.html', { root: '../frontend' });
-});
-
-app.get('/login', (req, res) => {
-    res.sendFile('login.html', { root: '../frontend' });
-});
+app.use('/', login);
 
 app.get('/main.css', function (req, res) {
     res.sendFile('main.css', { root: '../frontend' });
 });
 
-app.get('/home.js', function (req, res) {
-    res.sendFile('home.js', { root: '../frontend' });
+app.get('/register.js', function (req, res) {
+    res.sendFile('register.js', { root: '../frontend' });
 });
 
 app.get('/toppwd.text', function (req, res) {

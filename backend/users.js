@@ -1,21 +1,19 @@
-const { Pool } = require('pg');
+/*
+ * Author: Harvey Thompson
+ * Date: 27/03/2023
+ * Description: Backend code for the user registration page.
+ */
 
+const database = require('./db');
 const user = require('express').Router();
 const bodyParser = require('body-parser');
 const jsonParser = bodyParser.json();
 
-user.post('/', jsonParser, async (req, res) => {
-    let database = new Pool({
-        host: 'localhost',
-        port: 5432,
-        database: 'secure_software',
-        user: 'postgres',
-        password: 'password',
-        max: 20,
-        idleTimeoutMillis: 30000,
-        connectionTimeoutMillis: 10000,
-    });
+user.get('/', (req, res) => {
+    res.sendFile('register.html', { root: '../frontend' });
+});
 
+user.post('/', jsonParser, async (req, res) => {
     let email = req.body.email;
     let password = req.body.hash;
     let salt = req.body.salt;
