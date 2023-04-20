@@ -29,8 +29,15 @@ login.get('/', (req, res) => {
 });
 
 login.post('/login', loginLimiter, jsonParser, async (req, res) => {
+    console.log('Login request received');
     let email = req.body.email;
-    let password = req.body.hash;
+    let password = req.body.password;
+    console.log(email, password, 'email and password');
+    //decrypt the password before hashing
+    password = CryptoJS.AES.decrypt(password, 'WillFrazerWork?').toString(
+        CryptoJS.enc.Utf8
+    );
+    console.log(password, 'decrypted password');
 
     await database.query(`set search_path to user_data;`);
 
@@ -43,9 +50,9 @@ login.post('/login', loginLimiter, jsonParser, async (req, res) => {
     if (!(rows.length > 0)) {
         // handle case when no user was found
         const attemptsLeft = res.getHeader('X-RateLimit-Remaining');
-        res.status(404).send(
-            `Details did not match, try again. You have ${attemptsLeft} attempts left.`
-        );
+        res.status(404).send({
+            message: `Details did not match, try again. You have ${attemptsLeft} attempts left.`,
+        });
         return;
     }
 
@@ -55,8 +62,6 @@ login.post('/login', loginLimiter, jsonParser, async (req, res) => {
     daPwd = user.password;
     daPwdSalted = password + daSalt;
     daHashed = CryptoJS.SHA256(daPwdSalted).toString();
-    console.log(daHashed, 'hashed password');
-    console.log(daPwd, 'password from database');
 
     if (!(daHashed === daPwd)) {
         // handle case when password does not match

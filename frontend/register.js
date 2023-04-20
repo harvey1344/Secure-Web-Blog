@@ -21,7 +21,6 @@ const getRegistration = async () => {
     // get the user details from the form
     let email = document.getElementById('email').value;
     let password = document.getElementById('password').value;
-    console.log(typeof password);
 
     // check if password is common
     if (isPasswordCommon(password, pwdArray)) {
@@ -54,6 +53,7 @@ const getRegistration = async () => {
         },
     }).then(function (res) {
         if (res.ok) {
+            console.log('Registration successful');
             // Registration successful
             showSuccessAlert();
         } else {
@@ -102,7 +102,7 @@ function showSuccessAlert() {
     // Hide the alert after 3 seconds
     setTimeout(function () {
         alertBox.style.display = 'none';
-        window.location.href = '/login';
+        window.location.href = '/';
     }, 3000);
 }
 

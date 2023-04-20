@@ -21,9 +21,15 @@ app.use('/', login);
 app.get('/main.css', function (req, res) {
     res.sendFile('main.css', { root: '../frontend' });
 });
+app.get('/blog', function (req, res) {
+    res.sendFile('blog.html', { root: '../frontend' });
+});
 
 app.get('/register.js', function (req, res) {
     res.sendFile('register.js', { root: '../frontend' });
+});
+app.get('/login.js', function (req, res) {
+    res.sendFile('login.js', { root: '../frontend' });
 });
 
 app.get('/toppwd.text', function (req, res) {

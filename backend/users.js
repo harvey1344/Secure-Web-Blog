@@ -36,7 +36,7 @@ user.post('/', jsonParser, async (req, res) => {
             [email, password, salt]
         );
         console.log(email, password, 'user registered');
-        res.send('user registered');
+        res.status(200).send('user registered');
     }
 });
 

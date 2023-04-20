@@ -1,16 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>ASCII Art Example</title>
+    <meta charset="UTF-8" />
+    <title>Login</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="description" content="" />
+    <link rel="stylesheet" href="main.css">
+    <script src="hashing"></script>
+    <script src="login.js"></script>
 </head>
+
 <body>
-  <pre>
- _____          __  __ _       _             
-|_   _|__  _ __|  \/  (_) __ _| |_ ___  _ __ 
-  | |/ _ \| '__| |\/| | |/ _` | __/ _ \| '__|
-  | | (_) | |  | |  | | | (_| | || (_) | |   
-  |_|\___/|_|  |_|  |_|_|\__,_|\__\___/|_|   
-  </pre>
+    <div id="alert" class="alert" style="display: none;">
+        <span class="closebtn" onclick="closeAlert()">&times;</span>
+        <strong>Success!</strong> Login was successful. Please wait while we redirect you.
+      </div>
+      
+    <div class="AuthForm">
+        <h1>Welcome</h1>
+        <form onsubmit="loginRequest(); return false;">
+            <label htmlfor="email">Email</label>
+            <input class="textBox" type="email" id="email" name="email" placeholder="name@provider.com">
+            <label htmlfor="pasword">Password</label>
+            <input class="textBox" type="password" id="password" name="password" placeholder="******">
+            <input type="submit" value="Login" id="Login">
+        </form>
+        <a href="/register">New User?</a>
+    </div>
 </body>
 </html>
+
