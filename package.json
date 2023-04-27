@@ -4,7 +4,8 @@
   "description": "secure software project",
   "main": "index.js",
   "scripts": {
-    "pwd-test": "mocha ./tests/pwd.test.js"
+    "pwd-test": "mocha ./tests/pwd.test.js",
+    "devStart": "nodemon index.js"
   },
   "author": "",
   "license": "ISC",
