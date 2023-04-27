@@ -65,7 +65,10 @@ login.post('/login', loginLimiter, jsonParser, async (req, res) => {
 
     if (!(daHashed === daPwd)) {
         // handle case when password does not match
-        res.status(401).send('Password does not match');
+        const attemptsLeft = res.getHeader('X-RateLimit-Remaining');
+        res.status(404).send({
+            message: `Details did not match, try again. You have ${attemptsLeft} attempts left.`,
+        });
         return;
     }
 
