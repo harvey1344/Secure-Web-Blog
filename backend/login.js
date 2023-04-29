@@ -34,7 +34,7 @@ login.post('/login', loginLimiter, jsonParser, async (req, res) => {
     let password = req.body.password;
     console.log(email, password, 'email and password');
     //decrypt the password before hashing
-    password = CryptoJS.AES.decrypt(password, 'WillFrazerWork?').toString(
+    password = CryptoJS.AES.decrypt(password, 'Work?').toString(
         CryptoJS.enc.Utf8
     );
     console.log(password, 'decrypted password');
@@ -65,7 +65,10 @@ login.post('/login', loginLimiter, jsonParser, async (req, res) => {
 
     if (!(daHashed === daPwd)) {
         // handle case when password does not match
-        res.status(401).send('Password does not match');
+        const attemptsLeft = res.getHeader('X-RateLimit-Remaining');
+        res.status(404).send({
+            message: `Details did not match, try again. You have ${attemptsLeft} attempts left.`,
+        });
         return;
     }
 
