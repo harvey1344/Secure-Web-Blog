@@ -34,7 +34,7 @@ login.post('/login', loginLimiter, jsonParser, async (req, res) => {
     let password = req.body.password;
     console.log(email, password, 'email and password');
     //decrypt the password before hashing
-    password = CryptoJS.AES.decrypt(password, 'WillFrazerWork?').toString(
+    password = CryptoJS.AES.decrypt(password, 'Work?').toString(
         CryptoJS.enc.Utf8
     );
     console.log(password, 'decrypted password');
