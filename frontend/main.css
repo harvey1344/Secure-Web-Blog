@@ -106,3 +106,15 @@ h1{
   }
   
 
+.post{
+    display: grid;
+    grid-template-columns: auto auto;  
+    background-color: gray;  
+    justify-content: center;
+    margin: 30px;
+}
+
+.post>p{
+    grid-column: 1/ span 2;
+}
+
