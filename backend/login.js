@@ -71,7 +71,10 @@ login.post('/login', loginLimiter, jsonParser, async (req, res) => {
         });
         return;
     }
-
+        
+    // attaches the user id to the session
+    req.session.user_id = 1 //rows.user_id
+    //req.session.auth = true
     res.status(200).send('Login successful');
 });
 
