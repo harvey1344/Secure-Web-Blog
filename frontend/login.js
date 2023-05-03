@@ -4,7 +4,7 @@ const loginRequest = () => {
     let email = document.getElementById('email').value;
     let password = document.getElementById('password').value;
 
-    key = 'WillFrazerWork?';
+    key = 'Work?';
     password = CryptoJS.AES.encrypt(password, key).toString();
 
     // send user details to database with use of fetch API
