@@ -28,7 +28,7 @@ async function createdb() {
     await database.query(`create table posts(
         post_id serial NOT NULL,
         user_id int NOT NULL,
-        title varchar(30),
+        title varchar(100),
         body varchar,
         created_at date,
         updated_at date,

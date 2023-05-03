@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const users = require('./users');
 const login = require('./login');
+const blog = require('./blog')
 
 // set up server
 const PORT = 5000;
@@ -18,18 +19,23 @@ app.get('/hashing', (req, res) => {
 
 app.use('/', login);
 
+app.use('/blog', blog);
+
+
 app.get('/main.css', function (req, res) {
     res.sendFile('main.css', { root: '../frontend' });
 });
-app.get('/blog', function (req, res) {
-    res.sendFile('blog.html', { root: '../frontend' });
-});
+
 
 app.get('/register.js', function (req, res) {
     res.sendFile('register.js', { root: '../frontend' });
 });
 app.get('/login.js', function (req, res) {
     res.sendFile('login.js', { root: '../frontend' });
+});
+
+app.get('/blog.js', (req, res) => {
+    res.sendFile('blog.js', { root: '../frontend' });
 });
 
 app.get('/toppwd.text', function (req, res) {
