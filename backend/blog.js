@@ -24,6 +24,7 @@ blog.get('/createPost.js', (req, res) => {
 });
 
 blog.get('/posts',async(res,req)=>{
+    console.log(req.session)
     data = await database.query(`select users.name, users.user_id, 
     posts.post_id, posts.user_id, posts.title, posts.body, posts.created_at, posts.updated_at 
     from user_data.posts 
