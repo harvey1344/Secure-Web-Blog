@@ -1,7 +1,7 @@
 const express = require('express');
 const session = require('express-session')
-
 const cors = require('cors');
+
 const users = require('./users');
 const login = require('./login');
 const blog = require('./blog')
@@ -54,6 +54,32 @@ app.get('/toppwd.text', function (req, res) {
 });
 
 app.use('/register', users);
+
+
+
+function checkAuthenticated (req, res, next) {
+    console.log("checking user is auth")
+    if (req.session.user_id){ 
+        console.log("auth")
+
+        next()
+    }else {
+        console.log("not auth")
+        res.redirect('/')
+    }
+}
+
+function checkNotAuthenticated (req, res, next) {
+    console.log("checking user not auth")
+
+    if (!req.session.user_id){ 
+        console.log("not auth")
+        next()
+    }else {
+        console.log("auth")
+        res.redirect('/blog')
+    }
+}
 
 // run server
 app.listen(PORT, () => {

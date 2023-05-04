@@ -19,6 +19,7 @@ const getRegistration = async () => {
     pwdArray = pwdArray.map((pwd) => pwd.trim());
 
     // get the user details from the form
+    let name = document.getElementById('Name').value;
     let email = document.getElementById('email').value;
     let password = document.getElementById('password').value;
 
@@ -43,6 +44,7 @@ const getRegistration = async () => {
         method: 'POST',
         // Adding body or contents to send
         body: JSON.stringify({
+            name,
             email,
             hash,
             salt,

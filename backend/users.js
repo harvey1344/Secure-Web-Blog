@@ -14,6 +14,7 @@ user.get('/', (req, res) => {
 });
 
 user.post('/', jsonParser, async (req, res) => {
+    let name = req.body.name;
     let email = req.body.email;
     let password = req.body.hash;
     let salt = req.body.salt;
@@ -32,8 +33,8 @@ user.post('/', jsonParser, async (req, res) => {
     } else {
         // Email address does not exist in the database, insert new record
         await database.query(
-            `INSERT INTO user_data.users (email_address, password, salt) VALUES ($1, $2, $3)`,
-            [email, password, salt]
+            `INSERT INTO user_data.users (name,email_address, password, salt) VALUES ($1, $2, $3, $4)`,
+            [name, email, password, salt]
         );
         console.log(email, password, 'user registered');
         res.status(200).send('user registered');

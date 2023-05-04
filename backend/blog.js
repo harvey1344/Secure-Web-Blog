@@ -24,21 +24,21 @@ blog.get('/createPost.js', (req, res) => {
 });
 
 blog.get('/posts',async(res,req)=>{
-    console.log(req.session)
+    const user_id = req.req.session.user_id
     data = await database.query(`select users.name, users.user_id, 
     posts.post_id, posts.user_id, posts.title, posts.body, posts.created_at, posts.updated_at 
     from user_data.posts 
     inner join user_data.users on posts.user_id = users.user_id
     order by created_at`)
-    req.send(JSON.stringify(data = {posts:data.rows, id:1}))
+    req.send(JSON.stringify(data = {posts:data.rows, id:user_id}))
 })
 
 blog.post('/updateRequest',async(req,res)=>{
+    const user_id = req.session.user_id
+    
     data = await database.query(`select user_id from user_data.posts where post_id = $1`,
     [req.body.post_id])
-    //console.log(req.body)
-    //console.log(data.rows[0].user_id == req.body.user_id)
-    if(data.rows[0].user_id == req.body.user_id){
+    if(data.rows[0].user_id == user_id){
         res.redirect('/blog/updatePost')
     }else{
         res.status(404).send()
@@ -46,9 +46,7 @@ blog.post('/updateRequest',async(req,res)=>{
 })
 
 blog.post('/createPost',async(req,res)=>{
-    const user_id = 1
-    console.log("ran")
-
+    const user_id = req.session.user_id
     try{
         database.query(`insert into user_data.posts (user_id,title,body,created_at)
         values ($1,$2,$3,current_date)`,[user_id,req.body.title,req.body.body])
@@ -61,7 +59,7 @@ blog.post('/createPost',async(req,res)=>{
 })
 
 blog.post('/updatePost',async(req,res)=>{
-    const user_id = 1
+    const user_id = req.req.session.user_id
 
     data = await database.query(`select user_id from user_data.posts where post_id = $1`,
     [req.body.post_id])
@@ -85,12 +83,4 @@ blog.post('/updatePost',async(req,res)=>{
         }
     }
 })
-
-
-
-
-
-
-
-
 module.exports = blog;
