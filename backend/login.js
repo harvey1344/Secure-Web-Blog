@@ -73,6 +73,7 @@ login.post('/login', loginLimiter, jsonParser, async (req, res) => {
     }
         
     // attaches the user id to the session
+    req.session.user_ip = CryptoJS.SHA256(req.socket.remoteAddress).toString();
     req.session.user_id = user.user_id
     req.session.save()
     //req.session.auth = true

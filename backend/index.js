@@ -1,6 +1,8 @@
 const express = require('express');
 const session = require('express-session')
 const cors = require('cors');
+const CryptoJS = require('crypto-js');
+
 
 const users = require('./users');
 const login = require('./login');
@@ -30,17 +32,21 @@ app.get('/hashing', (req, res) => {
 
 app.use('/', login);
 
-app.use('/blog', blog);
+app.use('/blog',checkForIpChange,checkAuthenticated, blog);
 
 
 app.get('/main.css', function (req, res) {
     res.sendFile('main.css', { root: '../frontend' });
 });
 
+app.get('/inputSanitisation.js', function (req, res) {
+    res.sendFile('inputSanitisation.js', { root: '../frontend' });
+});
 
 app.get('/register.js', function (req, res) {
     res.sendFile('register.js', { root: '../frontend' });
 });
+
 app.get('/login.js', function (req, res) {
     res.sendFile('login.js', { root: '../frontend' });
 });
@@ -58,28 +64,31 @@ app.use('/register', users);
 
 
 function checkAuthenticated (req, res, next) {
-    console.log("checking user is auth")
     if (req.session.user_id){ 
-        console.log("auth")
 
         next()
     }else {
-        console.log("not auth")
         res.redirect('/')
     }
 }
 
-function checkNotAuthenticated (req, res, next) {
-    console.log("checking user not auth")
+function checkForIpChange(req,res,next){
+    user_ip = CryptoJS.SHA256(req.socket.remoteAddress).toString();
 
-    if (!req.session.user_id){ 
-        console.log("not auth")
+    if(req.session.user_ip==user_ip){
         next()
-    }else {
-        console.log("auth")
-        res.redirect('/blog')
+    }else{
+        req.session.destroy( err=>{
+            if (err){console.log("error");}
+            else{
+                res.redirect('/')
+            }
+        })
+              
     }
+
 }
+
 
 // run server
 app.listen(PORT, () => {

@@ -7,6 +7,14 @@ console.log(post_id)
 const updateRequest=()=>{
     let title = document.getElementById('title').value;
     let body = document.getElementById('body').value;
+
+    console.log(title)
+
+    title = sanitizeInput(title);
+    body = sanitizeInput(body)
+
+    console.log(title)
+
     
     fetch('/blog/updatePost', {
         // Adding method type
@@ -24,7 +32,7 @@ const updateRequest=()=>{
     }).then(res=>{
         if (res.redirected) {
             console.log('redirecting to post update');
-            window.location.href = res.url
+            //window.location.href = res.url
         } else {
             // Registration failed
             alert("unable to update");

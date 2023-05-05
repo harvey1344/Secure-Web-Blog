@@ -59,7 +59,7 @@ blog.post('/createPost',async(req,res)=>{
 })
 
 blog.post('/updatePost',async(req,res)=>{
-    const user_id = req.req.session.user_id
+    const user_id = req.session.user_id
 
     data = await database.query(`select user_id from user_data.posts where post_id = $1`,
     [req.body.post_id])
