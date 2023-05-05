@@ -87,5 +87,28 @@ let posts = getPosts()
 
 console.log(posts)
 
+async function searchPosts(posts){
+
+    
+
+
+
+
+
+    let searchQuery = document.getElementById('searchBar').value
+    searchQuery = searchQuery.toLowerCase()
+    let foundPosts = []
+    for(let x = 0; x<posts.length; x++){
+       let {title,name,body,id} = posts[x]
+       title = title.toLowerCase()
+       name = name.toLowerCase()
+       body = body.toLowerCase()
+
+       if (title.includes(searchQuery) || name.includes(searchQuery) || body.includes(searchQuery)){
+            foundPosts.push(posts[x])
+       }        
+    }
+}
+
 
 // 
