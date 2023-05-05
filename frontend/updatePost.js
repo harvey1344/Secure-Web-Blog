@@ -8,14 +8,11 @@ const updateRequest=()=>{
     let title = document.getElementById('title').value;
     let body = document.getElementById('body').value;
 
-    console.log(title)
 
     title = sanitizeInput(title);
     body = sanitizeInput(body)
 
-    console.log(title)
-
-    
+   
     fetch('/blog/updatePost', {
         // Adding method type
         method: 'POST',

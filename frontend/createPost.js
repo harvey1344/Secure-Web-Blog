@@ -1,6 +1,9 @@
 const createPost=()=>{
     let title = document.getElementById('title').value;
     let body = document.getElementById('body').value;
+
+    title = sanitizeInput(title);
+    body = sanitizeInput(body)
     
     fetch('/blog/createPost', {
         // Adding method type

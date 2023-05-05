@@ -23,6 +23,10 @@ const getRegistration = async () => {
     let email = document.getElementById('email').value;
     let password = document.getElementById('password').value;
 
+    name = sanitizeInput(name)
+    email = sanitizeInput(email)
+    password = sanitizeInput(password)
+
     // check if password is common
     if (isPasswordCommon(password, pwdArray)) {
         alert('Password is too common');
