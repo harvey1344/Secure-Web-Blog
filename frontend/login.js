@@ -4,6 +4,9 @@ const loginRequest = () => {
     let email = document.getElementById('email').value;
     let password = document.getElementById('password').value;
 
+    email = sanitizeInput(email)
+    password = sanitizeInput(password)
+
     key = 'Work?';
     password = CryptoJS.AES.encrypt(password, key).toString();
 
