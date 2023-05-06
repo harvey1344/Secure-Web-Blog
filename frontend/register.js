@@ -57,15 +57,19 @@ const getRegistration = async () => {
         headers: {
             'Content-type': 'application/json; charset=UTF-8',
         },
-    }).then(function (res) {
-        if (res.ok) {
-            console.log('Registration successful');
-            // Registration successful
-            showSuccessAlert();
-        } else {
+    }).then(function(res){
+        if (!res.ok) {
             // Registration failed
             alert('Email address already registered');
+        }else{
+            return res.json()
         }
+    }).then(function (res) {                    
+        //console.log(res.body)
+        alert("2fa code = "+ res.twoFA)
+        console.log('Registration successful');
+        // Registration successful
+        showSuccessAlert();        
     });
 };
 

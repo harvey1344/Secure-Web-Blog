@@ -13,6 +13,8 @@ const bodyParser = require('body-parser');
 const jsonParser = bodyParser.json();
 const rateLimit = require('express-rate-limit');
 const CryptoJS = require('crypto-js');
+const twofactor = require("node-2fa");
+
 
 // limit the number of login attempts from the same IP address
 // uses the express-rate-limit package
@@ -32,6 +34,7 @@ login.post('/login', loginLimiter, jsonParser, async (req, res) => {
     console.log('Login request received');
     let email = req.body.email;
     let password = req.body.password;
+    let twoFA = req.body.twoFA
     console.log(email, password, 'email and password');
     //decrypt the password before hashing
     password = CryptoJS.AES.decrypt(password, 'Work?').toString(
@@ -62,6 +65,7 @@ login.post('/login', loginLimiter, jsonParser, async (req, res) => {
     daPwd = user.password;
     daPwdSalted = password + daSalt;
     daHashed = CryptoJS.SHA256(daPwdSalted).toString();
+    token = user.twofa;
 
     if (!(daHashed === daPwd)) {
         // handle case when password does not match
@@ -70,6 +74,16 @@ login.post('/login', loginLimiter, jsonParser, async (req, res) => {
             message: `Details did not match, try again. You have ${attemptsLeft} attempts left.`,
         });
         return;
+    }
+
+    if(!twofactor.verifyToken(token,twoFA)){
+        console.log("tokens didnt match")
+         // handle case when 2FA does not match
+         const attemptsLeft = res.getHeader('X-RateLimit-Remaining');
+         res.status(404).send({
+             message: `Details did not match, try again. You have ${attemptsLeft} attempts left.`,
+         });
+         return;
     }
         
     // attaches the user id to the session
