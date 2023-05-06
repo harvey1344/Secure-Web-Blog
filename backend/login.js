@@ -14,6 +14,8 @@ const jsonParser = bodyParser.json();
 const rateLimit = require('express-rate-limit');
 const CryptoJS = require('crypto-js');
 const twofactor = require("node-2fa");
+const steraliseInput= require('./inputSterilisation')
+
 
 
 // limit the number of login attempts from the same IP address
@@ -32,9 +34,10 @@ login.get('/', (req, res) => {
 
 login.post('/login', loginLimiter, jsonParser, async (req, res) => {
     console.log('Login request received');
-    let email = req.body.email;
-    let password = req.body.password;
-    let twoFA = req.body.twoFA
+    let email = steraliseInput(req.body.email);
+    let password = steraliseInput(req.body.password);
+    let twoFA = steraliseInput(req.body.twoFA);
+    
     console.log(email, password, 'email and password');
     //decrypt the password before hashing
     password = CryptoJS.AES.decrypt(password, 'Work?').toString(
@@ -42,11 +45,9 @@ login.post('/login', loginLimiter, jsonParser, async (req, res) => {
     );
     console.log(password, 'decrypted password');
 
-    await database.query(`set search_path to user_data;`);
-
     // return the row if the user exits in the database
     const { rows } = await database.query(
-        'SELECT * FROM users WHERE email_address = $1',
+        'SELECT * FROM user_data.users WHERE email_address = $1',
         [email]
     );
 

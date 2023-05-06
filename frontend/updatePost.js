@@ -29,7 +29,7 @@ const updateRequest=()=>{
     }).then(res=>{
         if (res.redirected) {
             console.log('redirecting to post update');
-            //window.location.href = res.url
+            window.location.href = res.url
         } else {
             // Registration failed
             alert("unable to update");

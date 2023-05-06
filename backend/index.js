@@ -39,8 +39,8 @@ app.get('/main.css', function (req, res) {
     res.sendFile('main.css', { root: '../frontend' });
 });
 
-app.get('/inputSanitisation.js', function (req, res) {
-    res.sendFile('inputSanitisation.js', { root: '../frontend' });
+app.get('/inputSterilisation.js', function (req, res) {
+    res.sendFile('inputSterilisation.js', { root: '../frontend' });
 });
 
 app.get('/register.js', function (req, res) {
