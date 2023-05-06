@@ -1,5 +1,44 @@
+let ammountOfReadingsStored = 30
+
+let avePasswordComparison = 1
+let PasswordComparisonData = [ammountOfReadingsStored]
+
+function pushToPasswordComparisonData(element) {
+    if (PasswordComparisonData.length === ammountOfReadingsStored) {
+        PasswordComparisonData.shift();
+    }
+    PasswordComparisonData.push(element);
+  
+    let total = 0
+    PasswordComparisonData.forEach(number => {
+        total = total + number        
+    });
+
+    avePasswordComparison = total/pushToPasswordComparisonData.length
+  }
+
+let aveTwoFa = 1
+let TwoFaData = [ammountOfReadingsStored]
+
+function pushToTwoFaData(element) {
+    if (TwoFaData.length === TwoFaData) {
+        TwoFaData.shift();
+    }
+    TwoFaData.push(element);
+  
+    let total = 0
+    TwoFaData.forEach(number => {
+        total = total + number        
+    });
+        
+    aveTwoFa = total/TwoFaData.length
+  }
+
+
+
+
 /*
- * Author: Harvey Thompson
+ * Author: Harvey Thompson Jack BAiley
  * Date: 27/03/2023
  * Description: Backend code for the login page. User has 5 attempts to login
  *              before being locked out for 10 minutes. On login, the users email address
@@ -54,6 +93,7 @@ login.post('/login', loginLimiter, jsonParser, async (req, res) => {
     if (!(rows.length > 0)) {
         // handle case when no user was found
         const attemptsLeft = res.getHeader('X-RateLimit-Remaining');
+        setTimeout(avePasswordComparison+aveTwoFa)
         res.status(404).send({
             message: `Details did not match, try again. You have ${attemptsLeft} attempts left.`,
         });
@@ -68,14 +108,19 @@ login.post('/login', loginLimiter, jsonParser, async (req, res) => {
     daHashed = CryptoJS.SHA256(daPwdSalted).toString();
     token = user.twofa;
 
+    let timeOne = performance.now();
+
     if (!(daHashed === daPwd)) {
         // handle case when password does not match
         const attemptsLeft = res.getHeader('X-RateLimit-Remaining');
+        setTimeout(aveTwoFa)
         res.status(404).send({
             message: `Details did not match, try again. You have ${attemptsLeft} attempts left.`,
         });
         return;
     }
+
+    let timeTwo = performance.now();
 
     if(!twofactor.verifyToken(token,twoFA)){
         console.log("tokens didnt match")
@@ -86,13 +131,17 @@ login.post('/login', loginLimiter, jsonParser, async (req, res) => {
          });
          return;
     }
+
         
     // attaches the user id to the session
     req.session.user_ip = CryptoJS.SHA256(req.socket.remoteAddress).toString();
     req.session.user_id = user.user_id
     req.session.save()
-    //req.session.auth = true
     res.status(200).send('Login successful');
+    
+    let timeThree = performance.now();
+    pushToPasswordComparisonData(timeTwo-timeOne)
+    pushToTwoFaData(timeThree-timeTwo)
 });
 
 module.exports = login;
