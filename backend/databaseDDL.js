@@ -20,6 +20,7 @@ async function createdb() {
         email_address varchar(100),
         password varchar(100),
         salt varchar(100),
+        twoFA varchar(100),
         constraint pk_users PRIMARY KEY (
             user_id
             )
@@ -39,6 +40,8 @@ async function createdb() {
 
     await database.query(`ALTER TABLE posts ADD CONSTRAINT fk_user_id FOREIGN KEY(user_id)
     REFERENCES users (user_id);`);
+    console.log("done")
 }
 
 createdb();
+

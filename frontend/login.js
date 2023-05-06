@@ -3,6 +3,7 @@ const loginRequest = () => {
     // send login request to backend
     let email = document.getElementById('email').value;
     let password = document.getElementById('password').value;
+    let twoFA = document.getElementById('twoFactor').value;
 
     email = sanitizeInput(email)
     password = sanitizeInput(password)
@@ -18,6 +19,7 @@ const loginRequest = () => {
         body: JSON.stringify({
             email,
             password,
+            twoFA
         }),
         // Adding headers to the request
         headers: {
