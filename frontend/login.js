@@ -7,6 +7,8 @@ const loginRequest = () => {
 
     email = sanitizeInput(email)
     password = sanitizeInput(password)
+    twoFA = sanitizeInput(twoFA)
+
 
     key = 'Work?';
     password = CryptoJS.AES.encrypt(password, key).toString();
