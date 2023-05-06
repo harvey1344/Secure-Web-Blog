@@ -1,4 +1,4 @@
-let ammountOfReadingsStored = 30
+let ammountOfReadingsStored = 300
 
 let avePasswordComparison = 1
 let PasswordComparisonData = [ammountOfReadingsStored]
@@ -138,7 +138,7 @@ login.post('/login', loginLimiter, jsonParser, async (req, res) => {
     req.session.user_id = user.user_id
     req.session.save()
     res.status(200).send('Login successful');
-    
+
     let timeThree = performance.now();
     pushToPasswordComparisonData(timeTwo-timeOne)
     pushToTwoFaData(timeThree-timeTwo)
