@@ -1,6 +1,5 @@
 const express = require('express');
 const session = require('express-session')
-const cors = require('cors');
 const CryptoJS = require('crypto-js');
 const https = require('https')
 const fs = require('fs');
@@ -17,6 +16,9 @@ const blog = require('./blog')
 const PORT = 5000;
 const app = express();
 
+
+
+// middleware
 app.use((req, res, next) => {
     if (req.protocol === 'http') {
       res.redirect(`https://${req.hostname}${req.url}`);
@@ -25,9 +27,7 @@ app.use((req, res, next) => {
     }
 });
 
-// middleware
 app.use(express.json());
-app.use(cors());
 
 app.use(session({
     secret: 'long-random-string-of-characters', // Replace with a strong and unique secret key
