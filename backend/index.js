@@ -2,6 +2,11 @@ const express = require('express');
 const session = require('express-session')
 const cors = require('cors');
 const CryptoJS = require('crypto-js');
+const https = require('https')
+const fs = require('fs');
+
+
+
 
 
 const users = require('./users');
@@ -12,17 +17,29 @@ const blog = require('./blog')
 const PORT = 5000;
 const app = express();
 
+app.use((req, res, next) => {
+    if (req.protocol === 'http') {
+      res.redirect(`https://${req.hostname}${req.url}`);
+    } else {
+      next();
+    }
+});
+
 // middleware
 app.use(express.json());
 app.use(cors());
 
 app.use(session({
-    secret: 'test',
+    secret: 'long-random-string-of-characters', // Replace with a strong and unique secret key
     resave: false,
-    saveUninitialized: true
-}))
-
-
+    saveUninitialized: false,
+    cookie: {
+      secure: true, // Ensures cookies are only sent over HTTPS
+      httpOnly: true, // Prevents client-side JavaScript from accessing the cookie
+      sameSite: 'strict', // Restricts the cookie to be sent only with same-site requests
+      maxAge: 60*60*24, // expiration time 1 day
+    },
+  }));
 
 
 // express routers
@@ -89,8 +106,15 @@ function checkForIpChange(req,res,next){
 
 }
 
+const httpsOptions = {
+    key: fs.readFileSync('./certificates/key.pem'),
+    cert: fs.readFileSync('./certificates/cert.pem'),
+  };
+  
+  const httpsServer = https.createServer(httpsOptions, app);
+  
+  httpsServer.listen(5000, () => {
+    console.log('HTTPS server listening on port 5000');
+  });
 
-// run server
-app.listen(PORT, () => {
-    console.log('listening on port ' + PORT);
-});
+
