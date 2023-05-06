@@ -21,7 +21,7 @@ user.post('/', jsonParser, async (req, res) => {
     let email = steraliseInput(req.body.email);
     let password = steraliseInput(req.body.hash);
     let salt = req.body.salt;
-    let twoFA = twofactor.generateSecret({name: "blog", account: email}).secret
+    let twoFA = twofactor.generateSecret({name: "blog", account: email}).secret// needs encryption!!!
 
     await database.query(`set search_path to user_data;`);
 
