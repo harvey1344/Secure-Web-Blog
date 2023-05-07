@@ -1,7 +1,9 @@
+
+// recording timings for types of authentication
 let ammountOfReadingsStored = 300
 
 let avePasswordComparison = 1
-let PasswordComparisonData = [ammountOfReadingsStored]
+let PasswordComparisonData = []
 
 function pushToPasswordComparisonData(element) {
     if (PasswordComparisonData.length === ammountOfReadingsStored) {
@@ -18,7 +20,7 @@ function pushToPasswordComparisonData(element) {
   }
 
 let aveTwoFa = 1
-let TwoFaData = [ammountOfReadingsStored]
+let TwoFaData = []
 
 function pushToTwoFaData(element) {
     if (TwoFaData.length === TwoFaData) {
@@ -93,10 +95,13 @@ login.post('/login', loginLimiter, jsonParser, async (req, res) => {
     if (!(rows.length > 0)) {
         // handle case when no user was found
         const attemptsLeft = res.getHeader('X-RateLimit-Remaining');
-        setTimeout(avePasswordComparison+aveTwoFa)
-        res.status(404).send({
-            message: `Details did not match, try again. You have ${attemptsLeft} attempts left.`,
-        });
+
+        setTimeout(()=>{
+            res.status(404).send({
+                message: `Details did not match, try again. You have ${attemptsLeft} attempts left.`,
+            });
+        },aveTwoFa+avePasswordComparison)
+
         return;
     }
 
@@ -113,10 +118,13 @@ login.post('/login', loginLimiter, jsonParser, async (req, res) => {
     if (!(daHashed === daPwd)) {
         // handle case when password does not match
         const attemptsLeft = res.getHeader('X-RateLimit-Remaining');
-        setTimeout(aveTwoFa)
-        res.status(404).send({
-            message: `Details did not match, try again. You have ${attemptsLeft} attempts left.`,
-        });
+
+        setTimeout(()=>{
+            res.status(404).send({
+                message: `Details did not match, try again. You have ${attemptsLeft} attempts left.`,
+            });
+        },aveTwoFa)
+
         return;
     }
 

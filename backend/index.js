@@ -3,6 +3,7 @@ const session = require('express-session')
 const CryptoJS = require('crypto-js');
 const https = require('https')
 const fs = require('fs');
+require('dotenv').config({ path: './config.env' });
 
 
 
@@ -10,7 +11,8 @@ const fs = require('fs');
 
 const users = require('./users');
 const login = require('./login');
-const blog = require('./blog')
+const blog = require('./blog');
+const { config } = require('dotenv');
 
 // set up server
 const PORT = 5000;
@@ -30,7 +32,7 @@ app.use((req, res, next) => {
 app.use(express.json());
 
 app.use(session({
-    secret: 'long-random-string-of-characters', // Replace with a strong and unique secret key
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: {
