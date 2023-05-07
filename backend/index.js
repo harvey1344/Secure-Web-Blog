@@ -1,28 +1,47 @@
 const express = require('express');
 const session = require('express-session')
-const cors = require('cors');
 const CryptoJS = require('crypto-js');
+const https = require('https')
+const fs = require('fs');
+require('dotenv').config({ path: './config.env' });
+
+
+
 
 
 const users = require('./users');
 const login = require('./login');
-const blog = require('./blog')
+const blog = require('./blog');
+const { config } = require('dotenv');
 
 // set up server
 const PORT = 5000;
 const app = express();
 
+
+
 // middleware
+app.use((req, res, next) => {
+    if (req.protocol === 'http') {
+      res.redirect(`https://${req.hostname}${req.url}`);
+    } else {
+      next();
+    }
+});
+
 app.use(express.json());
-app.use(cors());
 
 app.use(session({
-    secret: 'test',
+    secret: process.env.SESSION_SECRET,
     resave: false,
-    saveUninitialized: true
-}))
-
-
+    saveUninitialized: false,
+    cookie: {
+      secure: true, // Ensures cookies are only sent over HTTPS
+      httpOnly: true, // Prevents client-side JavaScript from accessing the cookie
+      sameSite: 'strict', // Restricts the cookie to be sent only with same-site requests
+      maxAge: 60*60*24, // expiration time 1 day
+    },
+  }));
 
 
 // express routers
@@ -39,8 +58,8 @@ app.get('/main.css', function (req, res) {
     res.sendFile('main.css', { root: '../frontend' });
 });
 
-app.get('/inputSanitisation.js', function (req, res) {
-    res.sendFile('inputSanitisation.js', { root: '../frontend' });
+app.get('/inputSterilisation.js', function (req, res) {
+    res.sendFile('inputSterilisation.js', { root: '../frontend' });
 });
 
 app.get('/register.js', function (req, res) {
@@ -89,8 +108,15 @@ function checkForIpChange(req,res,next){
 
 }
 
+const httpsOptions = {
+    key: fs.readFileSync('./certificates/key.pem'),
+    cert: fs.readFileSync('./certificates/cert.pem'),
+  };
+  
+  const httpsServer = https.createServer(httpsOptions, app);
+  
+  httpsServer.listen(5000, () => {
+    console.log('HTTPS server listening on port 5000');
+  });
 
-// run server
-app.listen(PORT, () => {
-    console.log('listening on port ' + PORT);
-});
+

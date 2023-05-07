@@ -9,18 +9,19 @@ const user = require('express').Router();
 const bodyParser = require('body-parser');
 const jsonParser = bodyParser.json();
 const twofactor = require("node-2fa");
+const steraliseInput= require('./inputSterilisation')
+
 
 user.get('/', (req, res) => {
     res.sendFile('register.html', { root: '../frontend' });
 });
 
 user.post('/', jsonParser, async (req, res) => {
-    let name = req.body.name;
-    let email = req.body.email;
-    let password = req.body.hash;
+    let name = steraliseInput(req.body.name);
+    let email = steraliseInput(req.body.email);
+    let password = steraliseInput(req.body.hash);
     let salt = req.body.salt;
-    let twoFA = twofactor.generateSecret({name: "blog", account: email}).secret
-    console.log(twoFA)
+    let twoFA = twofactor.generateSecret({name: "blog", account: email}).secret// needs encryption!!!
 
     await database.query(`set search_path to user_data;`);
 

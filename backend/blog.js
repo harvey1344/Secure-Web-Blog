@@ -1,4 +1,5 @@
 const database = require('./db');
+const steraliseInput= require('./inputSterilisation')
 const blog = require('express').Router();
 const bodyParser = require('body-parser');
 const jsonParser = bodyParser.json();
@@ -24,7 +25,8 @@ blog.get('/createPost.js', (req, res) => {
 });
 
 blog.get('/posts',async(res,req)=>{
-    const user_id = req.req.session.user_id
+    const user_id = Number(req.req.session.user_id)
+
     data = await database.query(`select users.name, users.user_id, 
     posts.post_id, posts.user_id, posts.title, posts.body, posts.created_at, posts.updated_at 
     from user_data.posts 
@@ -34,10 +36,11 @@ blog.get('/posts',async(res,req)=>{
 })
 
 blog.post('/updateRequest',async(req,res)=>{
-    const user_id = req.session.user_id
+    const user_id = Number(req.session.user_id)
+    const post_id = Number(req.body.post_id)
     
     data = await database.query(`select user_id from user_data.posts where post_id = $1`,
-    [req.body.post_id])
+    [post_id])
     if(data.rows[0].user_id == user_id){
         res.redirect('/blog/updatePost')
     }else{
@@ -46,10 +49,14 @@ blog.post('/updateRequest',async(req,res)=>{
 })
 
 blog.post('/createPost',async(req,res)=>{
-    const user_id = req.session.user_id
+
     try{
         database.query(`insert into user_data.posts (user_id,title,body,created_at)
-        values ($1,$2,$3,current_date)`,[user_id,req.body.title,req.body.body])
+        values ($1,$2,$3,current_date)`,[
+            Number(req.session.user_id),
+            steraliseInput(req.body.title),
+            steraliseInput(req.body.body)
+        ])
         res.redirect('/blog')
     }catch(err){
         console.error(err)
@@ -59,10 +66,12 @@ blog.post('/createPost',async(req,res)=>{
 })
 
 blog.post('/updatePost',async(req,res)=>{
-    const user_id = req.session.user_id
+    const user_id = Number(req.session.user_id)
+    const post_id = Number(req.body.post_id)
+
 
     data = await database.query(`select user_id from user_data.posts where post_id = $1`,
-    [req.body.post_id])
+    [post_id])
 
     if(data.rows[0].user_id != user_id){  
         res.status(404).send()
@@ -72,10 +81,13 @@ blog.post('/updatePost',async(req,res)=>{
             set title = $1,
             body = $2,
             updated_at = current_date
-            where post_id = $3
-            `,[req.body.title,req.body.body,req.body.post_id])
+            where post_id = $3`,[
+                steraliseInput(req.body.title),
+                steraliseInput(req.body.body),
+                post_id
+            ])
+
             res.redirect('/blog')
-            //res.status(200).send()
         }catch(err){
             console.log("ran")
             console.error(err)
