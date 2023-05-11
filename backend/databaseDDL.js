@@ -17,6 +17,7 @@ async function createdb() {
     await database.query(`create table users(
         user_id serial NOT NULL,
         name varchar(20),
+        user_name varchar(20),
         email_address varchar(100),
         password varchar(100),
         salt varchar(100),
@@ -40,8 +41,7 @@ async function createdb() {
 
     await database.query(`ALTER TABLE posts ADD CONSTRAINT fk_user_id FOREIGN KEY(user_id)
     REFERENCES users (user_id);`);
-    console.log("done")
+    console.log('done');
 }
 
 createdb();
-

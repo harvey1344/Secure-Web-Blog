@@ -20,12 +20,14 @@ const getRegistration = async () => {
 
     // get the user details from the form
     let name = document.getElementById('Name').value;
+    let userName = document.getElementById('userName').value;
     let email = document.getElementById('email').value;
     let password = document.getElementById('password').value;
 
-    name = sanitizeInput(name)
-    email = sanitizeInput(email)
-    password = sanitizeInput(password)
+    name = sanitizeInput(name);
+    userName = sanitizeInput(userName);
+    email = sanitizeInput(email);
+    password = sanitizeInput(password);
 
     // check if password is common
     if (isPasswordCommon(password, pwdArray)) {
@@ -49,6 +51,7 @@ const getRegistration = async () => {
         // Adding body or contents to send
         body: JSON.stringify({
             name,
+            userName,
             email,
             hash,
             salt,
@@ -57,20 +60,22 @@ const getRegistration = async () => {
         headers: {
             'Content-type': 'application/json; charset=UTF-8',
         },
-    }).then(function(res){
-        if (!res.ok) {
-            // Registration failed
-            alert('Email address already registered');
-        }else{
-            return res.json()
-        }
-    }).then(function (res) {                    
-        //console.log(res.body)
-        alert("2fa code = "+ res.twoFA)
-        console.log('Registration successful');
-        // Registration successful
-        showSuccessAlert();        
-    });
+    })
+        .then(function (res) {
+            if (!res.ok) {
+                // Registration failed
+                alert('Email address already registered');
+            } else {
+                return res.json();
+            }
+        })
+        .then(function (res) {
+            //console.log(res.body)
+            alert('2fa code = ' + res.twoFA);
+            console.log('Registration successful');
+            // Registration successful
+            showSuccessAlert();
+        });
 };
 
 // function to check if password is in the most common password

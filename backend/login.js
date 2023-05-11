@@ -1,43 +1,39 @@
-
 // recording timings for types of authentication
-let ammountOfReadingsStored = 300
+let ammountOfReadingsStored = 300;
 
-let avePasswordComparison = 1
-let PasswordComparisonData = []
+let avePasswordComparison = 1;
+let PasswordComparisonData = [];
 
 function pushToPasswordComparisonData(element) {
     if (PasswordComparisonData.length === ammountOfReadingsStored) {
         PasswordComparisonData.shift();
     }
     PasswordComparisonData.push(element);
-  
-    let total = 0
-    PasswordComparisonData.forEach(number => {
-        total = total + number        
+
+    let total = 0;
+    PasswordComparisonData.forEach((number) => {
+        total = total + number;
     });
 
-    avePasswordComparison = total/pushToPasswordComparisonData.length
-  }
+    avePasswordComparison = total / pushToPasswordComparisonData.length;
+}
 
-let aveTwoFa = 1
-let TwoFaData = []
+let aveTwoFa = 1;
+let TwoFaData = [];
 
 function pushToTwoFaData(element) {
     if (TwoFaData.length === TwoFaData) {
         TwoFaData.shift();
     }
     TwoFaData.push(element);
-  
-    let total = 0
-    TwoFaData.forEach(number => {
-        total = total + number        
+
+    let total = 0;
+    TwoFaData.forEach((number) => {
+        total = total + number;
     });
-        
-    aveTwoFa = total/TwoFaData.length
-  }
 
-
-
+    aveTwoFa = total / TwoFaData.length;
+}
 
 /*
  * Author: Harvey Thompson Jack BAiley
@@ -48,59 +44,55 @@ function pushToTwoFaData(element) {
  *              Then the hash is compared to the hash stored in the database.
  */
 
-const database = require('./db');
-const login = require('express').Router();
-const bodyParser = require('body-parser');
+const database = require("./db");
+const login = require("express").Router();
+const bodyParser = require("body-parser");
 const jsonParser = bodyParser.json();
-const rateLimit = require('express-rate-limit');
-const CryptoJS = require('crypto-js');
+const rateLimit = require("express-rate-limit");
+const CryptoJS = require("crypto-js");
 const twofactor = require("node-2fa");
-const steraliseInput= require('./inputSterilisation')
-
-
+const steraliseInput = require("./inputSterilisation");
 
 // limit the number of login attempts from the same IP address
 // uses the express-rate-limit package
 const loginLimiter = rateLimit({
     windowMs: 10 * 60 * 1000,
     max: 5,
-    message:
-        'Too many login attempts from this IP, please try again after 10 minutes',
 });
 
 // send the login page to the client
-login.get('/', (req, res) => {
-    res.sendFile('login.html', { root: '../frontend' });
+login.get("/", (req, res) => {
+    res.sendFile("login.html", { root: "../frontend" });
 });
 
-login.post('/login', loginLimiter, jsonParser, async (req, res) => {
-    console.log('Login request received');
-    let email = steraliseInput(req.body.email);
+login.post("/login", loginLimiter, jsonParser, async (req, res) => {
+    console.log("Login request received");
+    let userName = steraliseInput(req.body.userName);
     let password = steraliseInput(req.body.password);
     let twoFA = steraliseInput(req.body.twoFA);
-    
-    console.log(email, password, 'email and password');
+
+    console.log(userName, password, "username and password");
     //decrypt the password before hashing
-    password = CryptoJS.AES.decrypt(password, 'Work?').toString(
+    password = CryptoJS.AES.decrypt(password, "Work?").toString(
         CryptoJS.enc.Utf8
     );
-    console.log(password, 'decrypted password');
+    console.log(password, "decrypted password");
 
     // return the row if the user exits in the database
     const { rows } = await database.query(
-        'SELECT * FROM user_data.users WHERE email_address = $1',
-        [email]
+        "SELECT * FROM user_data.users WHERE user_name = $1",
+        [userName]
     );
 
     if (!(rows.length > 0)) {
         // handle case when no user was found
-        const attemptsLeft = res.getHeader('X-RateLimit-Remaining');
+        const attemptsLeft = res.getHeader("X-RateLimit-Remaining");
 
-        setTimeout(()=>{
+        setTimeout(() => {
             res.status(404).send({
                 message: `Details did not match, try again. You have ${attemptsLeft} attempts left.`,
             });
-        },aveTwoFa+avePasswordComparison)
+        }, aveTwoFa + avePasswordComparison);
 
         return;
     }
@@ -117,39 +109,38 @@ login.post('/login', loginLimiter, jsonParser, async (req, res) => {
 
     if (!(daHashed === daPwd)) {
         // handle case when password does not match
-        const attemptsLeft = res.getHeader('X-RateLimit-Remaining');
+        const attemptsLeft = res.getHeader("X-RateLimit-Remaining");
 
-        setTimeout(()=>{
+        setTimeout(() => {
             res.status(404).send({
                 message: `Details did not match, try again. You have ${attemptsLeft} attempts left.`,
             });
-        },aveTwoFa)
+        }, aveTwoFa);
 
         return;
     }
 
     let timeTwo = performance.now();
 
-    if(!twofactor.verifyToken(token,twoFA)){
-        console.log("tokens didnt match")
-         // handle case when 2FA does not match
-         const attemptsLeft = res.getHeader('X-RateLimit-Remaining');
-         res.status(404).send({
-             message: `Details did not match, try again. You have ${attemptsLeft} attempts left.`,
-         });
-         return;
+    if (!twofactor.verifyToken(token, twoFA)) {
+        console.log("tokens didnt match");
+        // handle case when 2FA does not match
+        const attemptsLeft = res.getHeader("X-RateLimit-Remaining");
+        res.status(404).send({
+            message: `Details did not match, try again. You have ${attemptsLeft} attempts left.`,
+        });
+        return;
     }
 
-        
     // attaches the user id to the session
     req.session.user_ip = CryptoJS.SHA256(req.socket.remoteAddress).toString();
-    req.session.user_id = user.user_id
-    req.session.save()
-    res.status(200).send('Login successful');
+    req.session.user_id = user.user_id;
+    req.session.save();
+    res.status(200).send("Login successful");
 
     let timeThree = performance.now();
-    pushToPasswordComparisonData(timeTwo-timeOne)
-    pushToTwoFaData(timeThree-timeTwo)
+    pushToPasswordComparisonData(timeTwo - timeOne);
+    pushToTwoFaData(timeThree - timeTwo);
 });
 
 module.exports = login;
