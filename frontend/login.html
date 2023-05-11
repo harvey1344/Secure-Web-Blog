@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="main.css">
     <script src="hashing"></script>
     <script src="login.js"></script>
-    <script src="/inputSterilisation.js"></script>
+    <script src="inputSterilisation.js"></script>
 </head>
 
 <body>
@@ -28,8 +28,18 @@
             <input class="textBox" type="number" id="twoFactor" name="twoFactor" placeholder="123456">
             <input type="submit" value="Login" id="Login">
         </form>
+        <!-- <button id="enable2FA" onclick="generate2FASecret()">Enable 2FA</button> -->
+        <button id="enable2FA">Enable 2FA</button>
         <a href="/register">New User?</a>
     </div>
+    <div id="twoFactorSetup" style="display:none;">
+        <h2>Two-Factor Authentication Setup</h2>
+        <div id="qrCode"></div>
+        <p id="manualKey"></p>
+        <p>Scan the QR code with your authenticator app:</p>
+        <!-- <img id="qrCodeImage" src="" alt="QR Code" style="display: none;"> -->
+        <p id="manualKeyText" style="display: none;">Or manually enter this key in your app: <span id="manualKeyDisplay"></span></p>
+    </div>
+      
 </body>
 </html>
-

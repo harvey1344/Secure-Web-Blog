@@ -24,7 +24,9 @@ const getRegistration = async () => {
     let password = document.getElementById('password').value;
 
     name = sanitizeInput(name)
+    console.log(name)
     email = sanitizeInput(email)
+    console.log(email)
     password = sanitizeInput(password)
 
     // check if password is common

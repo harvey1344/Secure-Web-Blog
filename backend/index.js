@@ -6,17 +6,15 @@ const fs = require('fs');
 require('dotenv').config({ path: './config.env' });
 
 
-
-
-
 const users = require('./users');
 const login = require('./login');
 const blog = require('./blog');
-const { config } = require('dotenv');
+//const { config } = require('dotenv');
 
 // set up server
 const PORT = 5000;
 const app = express();
+app.use(session({ secret: process.env.SESSION_SECRET }));
 
 
 
@@ -39,7 +37,7 @@ app.use(session({
       secure: true, // Ensures cookies are only sent over HTTPS
       httpOnly: true, // Prevents client-side JavaScript from accessing the cookie
       sameSite: 'strict', // Restricts the cookie to be sent only with same-site requests
-      maxAge: 60*60*24, // expiration time 1 day
+      maxAge: 60*60*24 * 1000, // Updated value, expiration time 1 day
     },
   }));
 
@@ -69,7 +67,7 @@ app.get('/register.js', function (req, res) {
 app.get('/login.js', function (req, res) {
     res.sendFile('login.js', { root: '../frontend' });
 });
-
+// 
 app.get('/blog.js', (req, res) => {
     res.sendFile('blog.js', { root: '../frontend' });
 });
@@ -92,7 +90,7 @@ function checkAuthenticated (req, res, next) {
 }
 
 function checkForIpChange(req,res,next){
-    user_ip = CryptoJS.SHA256(req.socket.remoteAddress).toString();
+    const user_ip = CryptoJS.SHA256(req.socket.remoteAddress).toString(); // Added 'const'
 
     if(req.session.user_ip==user_ip){
         next()
@@ -109,13 +107,13 @@ function checkForIpChange(req,res,next){
 }
 
 const httpsOptions = {
-    key: fs.readFileSync('./certificates/key.pem'),
-    cert: fs.readFileSync('./certificates/cert.pem'),
+    key: fs.readFileSync('../certificates/key.pem'),
+    cert: fs.readFileSync('../certificates/cert.pem'),
   };
   
   const httpsServer = https.createServer(httpsOptions, app);
   
-  httpsServer.listen(5000, () => {
+  httpsServer.listen(PORT, () => {
     console.log('HTTPS server listening on port 5000');
   });
 

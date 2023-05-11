@@ -1,5 +1,9 @@
 steraliseInput = (input) => {
 
+    if(!input){
+      return "ERROR NO INPUT";
+    }
+
     // Remove any HTML tags from the input this is done removing
     // opening and closing angle brakets
     const sanitizedInput = input.replace(/<[^>]*>?/gm, '');

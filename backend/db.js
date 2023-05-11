@@ -1,5 +1,5 @@
 const { Pool } = require('pg');
-require('dotenv').config({ path: './config.env' });
+require('dotenv').config({ path: './backend/config.env' });
 
 console.log(process.env.DB_NAME)
 

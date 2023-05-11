@@ -1,8 +1,9 @@
 sanitizeInput = (input) => {
+  console.log(input);
     // Remove any HTML tags from the input this is done removing
     // opening and closing angle brakets
     const sanitizedInput = input.replace(/<[^>]*>?/gm, '');
-  
+  console.log(sanitizedInput);
     // Prevent SQL injection attacks by escaping special characters
     // this is done by escaping the charicters [ ' " ; \] 
     const sqlEscapedInput = sanitizedInput.replace(/['";\\]/g, '\\$&');
