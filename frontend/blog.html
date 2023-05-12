@@ -6,9 +6,18 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="description" content="" />
     <link rel="stylesheet" href="main.css">
+    <script src="/inputSterilisation.js"></script>
+
 </head>
 <body>
     <a href="/blog/createPost">Create Post</a>
+    <button id="logoutButton">Logout</button>
+    <form onsubmit="searchPosts(); return false;">
+        <label htmlfor="search">Search Posts</label>
+        <input class="text" type="text" id="searchBar" name="searchBar">
+        <input type="submit" value="Search" id="submitSearch">
+    </form>
+    <div id="cancel-container"></div>
     <div id="posts-container" class = "posts-container" ></div>
     <script src="blog.js"></script>
 </body>
