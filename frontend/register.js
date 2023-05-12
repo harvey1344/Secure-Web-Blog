@@ -62,19 +62,16 @@ const getRegistration = async () => {
         },
     })
         .then(function (res) {
-            if (!res.ok) {
-                // Registration failed
-                alert('Email address already registered');
-            } else {
-                return res.json();
-            }
-        })
-        .then(function (res) {
-            //console.log(res.body)
+            return res.json();  
+                      
+        }).then(function (res) {
+            if(!res.ok){
+                alert(res.message)
+            }else{
             alert('2fa code = ' + res.twoFA);
             console.log('Registration successful');
-            // Registration successful
             showSuccessAlert();
+            }
         });
 };
 

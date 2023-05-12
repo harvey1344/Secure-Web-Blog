@@ -24,7 +24,7 @@ user.post('/', jsonParser, async (req, res) => {
     let userName = steraliseInput(req.body.userName);
     let userNameHash = CryptoJS.SHA256(userName).toString();
     let email = steraliseInput(req.body.email);
-    let emailHash = CryptoJS.SHA256(userName).toString();
+    let emailHash = CryptoJS.SHA256(email).toString();
     let password = steraliseInput(req.body.hash);
     let salt = req.body.salt;
     let twoFA = twofactor.generateSecret({
@@ -47,12 +47,12 @@ user.post('/', jsonParser, async (req, res) => {
 
     if (rows.length > 0) {
         // User with email or username already exists in the database
-        if (rows.some((row) => row.email_hash === emailHash)) {
+        if (rows[0].email_hash === emailHash) {
             // Email address already registered
-            res.status(409).send('Email address already registered');
+            res.status(409).send(JSON.stringify({message:"Email allready registerd."}));
         } else {
             // Username is taken but email is available
-            res.status(409).send('Username is already taken');
+            res.status(409).send(JSON.stringify({message:"Username allready Taken."}));
         }
     } else {
         // Email address and username are available, insert new record
