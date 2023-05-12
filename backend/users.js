@@ -4,22 +4,20 @@
  * Description: Backend code for the user registration page.
  */
 
-const database = require('./db');
-const user = require('express').Router();
-const bodyParser = require('body-parser');
+const database = require("./db");
+const user = require("express").Router();
+const bodyParser = require("body-parser");
 const jsonParser = bodyParser.json();
-const twofactor = require('node-2fa');
-const steraliseInput = require('./inputSterilisation');
+const twofactor = require("node-2fa");
+const steraliseInput = require("./inputSterilisation");
 const CryptoJS = require("crypto-js");
-require('dotenv').config({ path: './config.env' });
+require("dotenv").config({ path: "./config.env" });
 
-
-
-user.get('/', (req, res) => {
-    res.sendFile('register.html', { root: '../frontend' });
+user.get("/", (req, res) => {
+    res.sendFile("register.html", { root: "../frontend" });
 });
 
-user.post('/', jsonParser, async (req, res) => {
+user.post("/", jsonParser, async (req, res) => {
     let name = steraliseInput(req.body.name);
     let userName = steraliseInput(req.body.userName);
     let userNameHash = CryptoJS.SHA256(userName).toString();
@@ -28,11 +26,11 @@ user.post('/', jsonParser, async (req, res) => {
     let password = steraliseInput(req.body.hash);
     let salt = req.body.salt;
     let twoFA = twofactor.generateSecret({
-        name: 'blog',
+        name: "blog",
         account: email,
     }).secret; // needs encryption!!!
 
-        // Generate a random key
+    // Generate a random key
     const keySize = 256; // 256 bits
     const key = CryptoJS.lib.WordArray.random(keySize / 8); // 8 bits per byte
 
@@ -49,29 +47,40 @@ user.post('/', jsonParser, async (req, res) => {
         // User with email or username already exists in the database
         if (rows[0].email_hash === emailHash) {
             // Email address already registered
-            res.status(409).send(JSON.stringify({message:"Email allready registerd."}));
+            res.status(409).send(
+                JSON.stringify({ message: "Email allready registerd." })
+            );
+            return;
         } else {
             // Username is taken but email is available
-            res.status(409).send(JSON.stringify({message:"Username allready Taken."}));
+            res.status(409).send(
+                JSON.stringify({ message: "Username allready Taken." })
+            );
+            return;
         }
-    } else {
-        // Email address and username are available, insert new record
-        await database.query(
-            `INSERT INTO user_data.users (name,user_name,user_name_hash, email_address,email_hash, password, salt, twoFA, encryption_key) 
+    }
+    // Email address and username are available, insert new record
+    await database.query(
+        `INSERT INTO user_data.users (name,user_name,user_name_hash, email_address,email_hash, password, salt, twoFA, encryption_key) 
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-            [CryptoJS.AES.encrypt(name,keyString).toString(),
-            CryptoJS.AES.encrypt(userName,keyString).toString(),
+        [
+            CryptoJS.AES.encrypt(name, keyString).toString(),
+            CryptoJS.AES.encrypt(userName, keyString).toString(),
             userNameHash,
-            CryptoJS.AES.encrypt(email,keyString).toString(),
+            CryptoJS.AES.encrypt(email, keyString).toString(),
             emailHash,
             password,
-            CryptoJS.AES.encrypt(salt,keyString).toString(),
-            CryptoJS.AES.encrypt(twoFA,keyString).toString(),
-            CryptoJS.AES.encrypt(keyString, process.env.ENCRYPTION_KEY).toString(),]
-        );
-        console.log(email, password, 'user registered');
-        res.status(200).send(JSON.stringify({ twoFA: twoFA }));
-    }
+            CryptoJS.AES.encrypt(salt, keyString).toString(),
+            CryptoJS.AES.encrypt(twoFA, keyString).toString(),
+            CryptoJS.AES.encrypt(
+                keyString,
+                process.env.ENCRYPTION_KEY
+            ).toString(),
+        ]
+    );
+    console.log(email, password, "user registered");
+    res.status(200).send(JSON.stringify({ twoFA: twoFA }));
+    console.log("Registration successful");
 });
 
 module.exports = user;

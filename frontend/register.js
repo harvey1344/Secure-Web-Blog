@@ -7,9 +7,9 @@
 
 // function to return an array of the most common passwords from a text file
 const getPasswords = async () => {
-    const response = await fetch('/toppwd.text');
+    const response = await fetch("/toppwd.text");
     const data = await response.text();
-    const dataArray = data.split('\n'); // split data by newlines to create an array
+    const dataArray = data.split("\n"); // split data by newlines to create an array
     return dataArray;
 };
 
@@ -19,10 +19,10 @@ const getRegistration = async () => {
     pwdArray = pwdArray.map((pwd) => pwd.trim());
 
     // get the user details from the form
-    let name = document.getElementById('Name').value;
-    let userName = document.getElementById('userName').value;
-    let email = document.getElementById('email').value;
-    let password = document.getElementById('password').value;
+    let name = document.getElementById("Name").value;
+    let userName = document.getElementById("userName").value;
+    let email = document.getElementById("email").value;
+    let password = document.getElementById("password").value;
 
     name = sanitizeInput(name);
     userName = sanitizeInput(userName);
@@ -31,11 +31,11 @@ const getRegistration = async () => {
 
     // check if password is common
     if (isPasswordCommon(password, pwdArray)) {
-        alert('Password is too common');
+        alert("Password is too common");
         return;
     }
     if (!isPasswordStrong(password)) {
-        alert('Password is not strong enough');
+        alert("Password is not strong enough");
         return;
     }
 
@@ -45,9 +45,9 @@ const getRegistration = async () => {
     const saltedPassword = password + salt; // concatenate password and salt
     const hash = CryptoJS.SHA256(saltedPassword).toString();
     // send user details to database with use of fetch API
-    fetch('/register', {
+    fetch("/register", {
         // Adding method type
-        method: 'POST',
+        method: "POST",
         // Adding body or contents to send
         body: JSON.stringify({
             name,
@@ -58,20 +58,23 @@ const getRegistration = async () => {
         }),
         // Adding headers to the request
         headers: {
-            'Content-type': 'application/json; charset=UTF-8',
+            "Content-type": "application/json; charset=UTF-8",
         },
     })
         .then(function (res) {
-            return res.json();  
-                      
-        }).then(function (res) {
-            if(!res.ok){
-                alert(res.message)
-            }else{
-            alert('2fa code = ' + res.twoFA);
-            console.log('Registration successful');
-            showSuccessAlert();
+            if (!res.ok) {
+                // Registration failed
+                alert("User faul");
+            } else {
+                return res.json();
             }
+        })
+        .then(function (res) {
+            //console.log(res.body)
+            alert("2fa code = " + res.twoFA);
+            console.log("Registration successful");
+            // Registration successful
+            showSuccessAlert();
         });
 };
 
@@ -108,30 +111,34 @@ const isPasswordStrong = (password) => {
 
 function showSuccessAlert() {
     // Show the alert
-    var alertBox = document.getElementById('alert');
-    alertBox.style.display = 'block';
+    var alertBox = document.getElementById("alert");
+    alertBox.style.display = "block";
 
     // Hide the alert after 3 seconds
     setTimeout(function () {
-        alertBox.style.display = 'none';
-        window.location.href = '/';
+        alertBox.style.display = "none";
+        window.location.href = "/";
     }, 3000);
 }
 
 function closeAlert() {
-    var alertBox = document.getElementById('alert');
-    alertBox.style.display = 'none';
+    var alertBox = document.getElementById("alert");
+    alertBox.style.display = "none";
 }
 
 const generateSalt = (length) => {
     var chars =
-        '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    var salt = '';
+        "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    var salt = "";
     for (var i = 0; i < length; i++) {
         salt += chars.charAt(Math.floor(Math.random() * chars.length));
     }
     return salt;
 };
+
+function redirectToBlog() {
+    window.location.href = "/blog";
+}
 
 module.exports.getPasswords = getPasswords;
 module.exports.isPasswordCommon = isPasswordCommon;
