@@ -76,13 +76,24 @@ app.get('/bad', function (req, res) {
     res.sendFile('/bad.html', { root: '../frontend' });
 });
 
+app.get('/logout', checkAuthenticated, function(req,res){
+    req.session.destroy((err)=>{
+        if (err){
+            res.status(409).send()
+        }else{
+            res.status(200).send()
+        }
+    })
+})
+
 app.use('/register', users);
 
 function checkAuthenticated(req, res, next) {
     if (req.session.user_id) {
         next();
     } else {
-        res.redirect('/bad');
+        console.log("not auth")
+        res.redirect('/');
     }
 }
 
@@ -92,11 +103,12 @@ function checkForIpChange(req, res, next) {
     if (req.session.user_ip == user_ip) {
         next();
     } else {
+        console.log("ip changed")
         req.session.destroy((err) => {
             if (err) {
                 console.log('error');
             } else {
-                res.redirect('/bad');
+                res.redirect('/');
             }
         });
     }

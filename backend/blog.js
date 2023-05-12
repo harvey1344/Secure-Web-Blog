@@ -2,7 +2,9 @@ const database = require('./db');
 const steraliseInput= require('./inputSterilisation')
 const blog = require('express').Router();
 const bodyParser = require('body-parser');
-const jsonParser = bodyParser.json();
+const CryptoJS = require("crypto-js");
+
+require('dotenv').config({ path: './config.env' });
 
 blog.get('/', (req, res) => {
     res.sendFile('blog.html', { root: '../frontend' });
@@ -25,14 +27,22 @@ blog.get('/createPost.js', (req, res) => {
 });
 
 blog.get('/posts',async(res,req)=>{
-    const user_id = Number(req.req.session.user_id)
+    const user_id = Number(res.session.user_id)
 
-    data = await database.query(`select users.name, users.user_id, 
+    
+
+    data = await database.query(`select users.user_name, users.user_id,
     posts.post_id, posts.user_id, posts.title, posts.body, posts.created_at, posts.updated_at 
     from user_data.posts 
     inner join user_data.users on posts.user_id = users.user_id
     order by created_at`)
-    req.send(JSON.stringify(data = {posts:data.rows, id:user_id}))
+
+    for (const row of data.rows) {
+        const res = await database.query('SELECT encryption_key FROM user_data.users WHERE user_id = $1', [row.user_id]);
+        const key = CryptoJS.AES.decrypt(res.rows[0].encryption_key, process.env.ENCRYPTION_KEY).toString(CryptoJS.enc.Utf8);
+        row.user_name = CryptoJS.AES.decrypt(row.user_name, key).toString(CryptoJS.enc.Utf8);
+      }
+    req.send(JSON.stringify(data = {posts:data.rows, id :user_id}))
 })
 
 blog.post('/updateRequest',async(req,res)=>{
@@ -47,6 +57,23 @@ blog.post('/updateRequest',async(req,res)=>{
         res.status(404).send()
     }
 })
+
+
+blog.post('/deleteRequest',async(req,res)=>{
+    const user_id = Number(req.session.user_id)
+    const post_id = Number(req.body.post_id)
+
+    try{
+    data = await database.query(`delete from user_data.posts where post_id = $1`,
+    [post_id])    
+        res.status(200).send()
+        getPosts()
+    }catch(error){
+        res.status(404).send()
+    }
+})
+
+
 
 blog.post('/createPost',async(req,res)=>{
 
@@ -95,4 +122,28 @@ blog.post('/updatePost',async(req,res)=>{
         }
     }
 })
+
+
+blog.post('/search',async(req,res)=>{
+    user_id = req.session.user_id
+    searchText = steraliseInput(req.body.searchText)
+
+    data = await database.query(`
+  SELECT users.user_name, users.user_id, posts.post_id, posts.user_id, posts.title, posts.body, posts.created_at, posts.updated_at
+  FROM user_data.posts
+  INNER JOIN user_data.users ON posts.user_id = users.user_id
+  WHERE posts.title LIKE '%' || $1 || '%' OR posts.body LIKE '%' || $1 || '%'
+  ORDER BY created_at
+`, [searchText]);
+
+    for (const row of data.rows) {
+        const res = await database.query('SELECT encryption_key FROM user_data.users WHERE user_id = $1', [row.user_id]);
+        const key = CryptoJS.AES.decrypt(res.rows[0].encryption_key, process.env.ENCRYPTION_KEY).toString(CryptoJS.enc.Utf8);
+        row.user_name = CryptoJS.AES.decrypt(row.user_name, key).toString(CryptoJS.enc.Utf8);
+      }
+    res.send(JSON.stringify(data = {posts:data.rows, id :user_id}))
+
+})
+
+
 module.exports = blog;
