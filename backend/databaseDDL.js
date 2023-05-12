@@ -16,12 +16,15 @@ async function createdb() {
     await database.query(`set search_path to user_data;`);
     await database.query(`create table users(
         user_id serial NOT NULL,
-        name varchar(20),
-        user_name varchar(20),
-        email_address varchar(100),
-        password varchar(100),
-        salt varchar(100),
-        twoFA varchar(100),
+        name varchar,
+        user_name varchar,
+        user_name_hash varchar,
+        email_address varchar,
+        email_hash varchar,
+        password varchar,
+        salt varchar,
+        twoFA varchar,
+        encryption_key varchar,
         constraint pk_users PRIMARY KEY (
             user_id
             )

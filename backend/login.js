@@ -52,6 +52,8 @@ const rateLimit = require("express-rate-limit");
 const CryptoJS = require("crypto-js");
 const twofactor = require("node-2fa");
 const steraliseInput = require("./inputSterilisation");
+require('dotenv').config({ path: './config.env' });
+
 
 // limit the number of login attempts from the same IP address
 // uses the express-rate-limit package
@@ -67,6 +69,7 @@ login.get("/", (req, res) => {
 
 login.post("/login", loginLimiter, jsonParser, async (req, res) => {
     console.log("Login request received");
+
     let userName = steraliseInput(req.body.userName);
     let password = steraliseInput(req.body.password);
     let twoFA = steraliseInput(req.body.twoFA);
@@ -80,11 +83,12 @@ login.post("/login", loginLimiter, jsonParser, async (req, res) => {
 
     // return the row if the user exits in the database
     const { rows } = await database.query(
-        "SELECT * FROM user_data.users WHERE user_name = $1",
-        [userName]
+        "SELECT * FROM user_data.users WHERE user_name_hash = $1",
+        [CryptoJS.SHA256(userName).toString()]
     );
 
     if (!(rows.length > 0)) {
+        console.log("no user name found")
         // handle case when no user was found
         const attemptsLeft = res.getHeader("X-RateLimit-Remaining");
 
@@ -98,17 +102,18 @@ login.post("/login", loginLimiter, jsonParser, async (req, res) => {
     }
 
     const user = rows[0];
-    //console.log(user.email_address, user.password, user.salt, 'user found');
-    daSalt = user.salt;
+    encryptionKey = CryptoJS.AES.decrypt(user.encryption_key,process.env.ENCRYPTION_KEY).toString(CryptoJS.enc.Utf8);
+    daSalt = CryptoJS.AES.decrypt(user.salt,encryptionKey).toString(CryptoJS.enc.Utf8);
     daPwd = user.password;
     daPwdSalted = password + daSalt;
     daHashed = CryptoJS.SHA256(daPwdSalted).toString();
-    token = user.twofa;
+    token = CryptoJS.AES.decrypt(user.twofa,encryptionKey).toString(CryptoJS.enc.Utf8);
 
     let timeOne = performance.now();
 
     if (!(daHashed === daPwd)) {
         // handle case when password does not match
+        console.log("password no match")
         const attemptsLeft = res.getHeader("X-RateLimit-Remaining");
 
         setTimeout(() => {

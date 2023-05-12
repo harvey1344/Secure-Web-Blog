@@ -57,7 +57,7 @@ async function getPosts(){
                 post.appendChild(postTitle)
             
                 const userName = document.createElement("h3")
-                userName.appendChild(document.createTextNode(postData[x].name))
+                userName.appendChild(document.createTextNode(postData[x].user_name))
                 post.appendChild(userName)
             
                 const body = document.createElement("p")

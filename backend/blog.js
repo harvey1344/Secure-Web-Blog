@@ -2,6 +2,10 @@ const database = require('./db');
 const steraliseInput= require('./inputSterilisation')
 const blog = require('express').Router();
 const bodyParser = require('body-parser');
+const CryptoJS = require("crypto-js");
+
+require('dotenv').config({ path: './config.env' });
+
 const jsonParser = bodyParser.json();
 
 blog.get('/', (req, res) => {
@@ -27,11 +31,23 @@ blog.get('/createPost.js', (req, res) => {
 blog.get('/posts',async(res,req)=>{
     const user_id = Number(req.req.session.user_id)
 
-    data = await database.query(`select users.name, users.user_id, 
+    
+
+    data = await database.query(`select users.user_name, users.user_id,
     posts.post_id, posts.user_id, posts.title, posts.body, posts.created_at, posts.updated_at 
     from user_data.posts 
     inner join user_data.users on posts.user_id = users.user_id
     order by created_at`)
+
+    for (const row of data.rows) {
+        const res = await database.query('SELECT encryption_key FROM user_data.users WHERE user_id = $1', [row.user_id]);
+        const key = CryptoJS.AES.decrypt(res.rows[0].encryption_key, process.env.ENCRYPTION_KEY).toString(CryptoJS.enc.Utf8);
+        console.log(key);
+        console.log(row.user_name);
+        row.user_name = CryptoJS.AES.decrypt(row.user_name, key).toString(CryptoJS.enc.Utf8);
+        let decryptedValue = CryptoJS.AES.decrypt(row.user_name, key).toString(CryptoJS.enc.Utf8);
+        console.log("decrypted", decryptedValue);
+      }
     req.send(JSON.stringify(data = {posts:data.rows, id:user_id}))
 })
 

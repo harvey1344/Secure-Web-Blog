@@ -82,7 +82,7 @@ function checkAuthenticated(req, res, next) {
     if (req.session.user_id) {
         next();
     } else {
-        res.redirect('/bad');
+        res.redirect('/');
     }
 }
 
@@ -96,7 +96,7 @@ function checkForIpChange(req, res, next) {
             if (err) {
                 console.log('error');
             } else {
-                res.redirect('/bad');
+                res.redirect('/');
             }
         });
     }
