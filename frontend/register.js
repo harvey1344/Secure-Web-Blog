@@ -65,6 +65,7 @@ const getRegistration = async () => {
             if (!res.ok) {
                 // Registration failed
                 alert("User faul");
+                return Promise.reject(new Error("Registration failed"));
             } else {
                 return res.json();
             }
@@ -75,6 +76,10 @@ const getRegistration = async () => {
             console.log("Registration successful");
             // Registration successful
             showSuccessAlert();
+        })
+        .catch(function (error) {
+            // Handle the error here
+            //do nothing
         });
 };
 
