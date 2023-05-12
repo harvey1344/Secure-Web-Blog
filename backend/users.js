@@ -41,7 +41,7 @@ user.post('/', jsonParser, async (req, res) => {
 
     // Check if the email already exists in the database
     const { rows } = await database.query(
-        `SELECT * FROM user_data.users WHERE email_address = $1 OR user_name = $2`,
+        `SELECT * FROM user_data.users WHERE email_hash = $1 OR user_name_hash = $2`,
         [emailHash, userNameHash]
     );
 
