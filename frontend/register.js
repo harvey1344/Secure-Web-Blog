@@ -64,17 +64,39 @@ const getRegistration = async () => {
         .then(function (res) {
             if (!res.ok) {
                 // Registration failed
-                alert("Username or email in use. Please check if you allready have an account.");
+                alert(
+                    "Username or email in use. Please check if you allready have an account."
+                );
                 return Promise.reject(new Error("Registration failed"));
             } else {
                 return res.json();
             }
         })
         .then(function (res) {
-            //console.log(res.body)
-            alert("2fa code = " + res.twoFA);
+            code = res.twoFA;
+            alert("2fa code = " + code.toString());
+            console.log(typeof code);
             console.log("Registration successful");
             // Registration successful
+            var qr = qrcode(4, "L");
+            qr.addData(code.toUpperCase());
+            qr.make();
+
+            // Create an image element with the QR code data
+            var imgElement = document.createElement("img");
+            imgElement.src = qr.createDataURL();
+
+            // Set the desired size for the QR code
+            var size = 300; // Adjust the size as per your requirement
+            imgElement.style.width = size + "px";
+            imgElement.style.height = size + "px";
+
+            // Get the container elements
+            var qrContainer = document.getElementById("qr");
+
+            // Append the image to the QR code container
+            qrContainer.appendChild(imgElement);
+
             showSuccessAlert();
         })
         .catch(function (error) {
@@ -119,11 +141,11 @@ function showSuccessAlert() {
     var alertBox = document.getElementById("alert");
     alertBox.style.display = "block";
 
-    // Hide the alert after 3 seconds
+    // Hide the alert after 2 mins
     setTimeout(function () {
         alertBox.style.display = "none";
         window.location.href = "/";
-    }, 3000);
+    }, 120000);
 }
 
 function closeAlert() {

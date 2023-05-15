@@ -1,14 +1,14 @@
-const express = require('express');
-const session = require('express-session');
-const CryptoJS = require('crypto-js');
-const https = require('https');
-const fs = require('fs');
-require('dotenv').config({ path: './config.env' });
+const express = require("express");
+const session = require("express-session");
+const CryptoJS = require("crypto-js");
+const https = require("https");
+const fs = require("fs");
+require("dotenv").config({ path: "./config.env" });
 
-const users = require('./users');
-const login = require('./login');
-const blog = require('./blog');
-const { config } = require('dotenv');
+const users = require("./users");
+const login = require("./login");
+const blog = require("./blog");
+const { config } = require("dotenv");
 
 // set up server
 const PORT = 5000;
@@ -16,7 +16,7 @@ const app = express();
 
 // middleware
 app.use((req, res, next) => {
-    if (req.protocol === 'http') {
+    if (req.protocol === "http") {
         res.redirect(`https://${req.hostname}${req.url}`);
     } else {
         next();
@@ -33,67 +33,70 @@ app.use(
         cookie: {
             secure: true, // Ensures cookies are only sent over HTTPS
             httpOnly: true, // Prevents client-side JavaScript from accessing the cookie
-            sameSite: 'strict', // Restricts the cookie to be sent only with same-site requests
+            sameSite: "strict", // Restricts the cookie to be sent only with same-site requests
             maxAge: 60 * 60 * 24, // expiration time 1 day
         },
     })
 );
 
 // express routers
-app.get('/hashing', (req, res) => {
-    res.sendFile('bower_components/crypto-js/crypto-js.js', { root: '../' });
+app.get("/hashing", (req, res) => {
+    res.sendFile("bower_components/crypto-js/crypto-js.js", { root: "../" });
 });
 
-app.use('/', login);
+app.use("/", login);
 
-app.use('/blog', checkForIpChange, checkAuthenticated, blog);
+app.use("/blog", checkForIpChange, checkAuthenticated, blog);
 
-app.get('/main.css', function (req, res) {
-    res.sendFile('main.css', { root: '../frontend' });
+app.get("/main.css", function (req, res) {
+    res.sendFile("main.css", { root: "../frontend" });
 });
 
-app.get('/inputSterilisation.js', function (req, res) {
-    res.sendFile('inputSterilisation.js', { root: '../frontend' });
+app.get("/inputSterilisation.js", function (req, res) {
+    res.sendFile("inputSterilisation.js", { root: "../frontend" });
 });
 
-app.get('/register.js', function (req, res) {
-    res.sendFile('register.js', { root: '../frontend' });
+app.get("/register.js", function (req, res) {
+    res.sendFile("register.js", { root: "../frontend" });
 });
 
-app.get('/login.js', function (req, res) {
-    res.sendFile('login.js', { root: '../frontend' });
+app.get("/login.js", function (req, res) {
+    res.sendFile("login.js", { root: "../frontend" });
+});
+app.get("/qr", function (req, res) {
+    res.sendFile("qrcode.js", { root: "../frontend" });
 });
 
-app.get('/blog.js', (req, res) => {
-    res.sendFile('blog.js', { root: '../frontend' });
+app.get("/blog.js", (req, res) => {
+    res.sendFile("blog.js", { root: "../frontend" });
 });
 
-app.get('/toppwd.text', function (req, res) {
-    res.sendFile('100pwd.txt', { root: '../' });
+app.get("/toppwd.text", function (req, res) {
+    res.sendFile("100pwd.txt", { root: "../" });
 });
 
-app.get('/bad', function (req, res) {
-    res.sendFile('/bad.html', { root: '../frontend' });
+app.get("/bad", function (req, res) {
+    res.sendFile("/bad.html", { root: "../frontend" });
 });
 
-app.get('/logout', checkAuthenticated, function(req,res){
-    req.session.destroy((err)=>{
-        if (err){
-            res.status(409).send()
-        }else{
-            res.status(200).send()
+app.get("/logout", checkAuthenticated, function (req, res) {
+    req.session.destroy((err) => {
+        if (err) {
+            res.status(409).send();
+        } else {
+            res.status(200).send();
         }
-    })
-})
+    });
+});
 
-app.use('/register', users);
+app.use("/register", users);
 
 function checkAuthenticated(req, res, next) {
     if (req.session.user_id) {
         next();
     } else {
-        console.log("not auth")
-        res.redirect('/');
+        console.log("not auth");
+        res.redirect("/");
     }
 }
 
@@ -103,24 +106,24 @@ function checkForIpChange(req, res, next) {
     if (req.session.user_ip == user_ip) {
         next();
     } else {
-        console.log("ip changed")
+        console.log("ip changed");
         req.session.destroy((err) => {
             if (err) {
-                console.log('error');
+                console.log("error");
             } else {
-                res.redirect('/');
+                res.redirect("/");
             }
         });
     }
 }
 
 const httpsOptions = {
-    key: fs.readFileSync('./certificates/key.pem'),
-    cert: fs.readFileSync('./certificates/cert.pem'),
+    key: fs.readFileSync("./certificates/key.pem"),
+    cert: fs.readFileSync("./certificates/cert.pem"),
 };
 
 const httpsServer = https.createServer(httpsOptions, app);
 
 httpsServer.listen(5000, () => {
-    console.log('HTTPS server listening on port 5000');
+    console.log("HTTPS server listening on port 5000");
 });

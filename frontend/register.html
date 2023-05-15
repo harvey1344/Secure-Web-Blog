@@ -9,6 +9,7 @@
     <script src="hashing"></script>
     <script src="register.js"></script>
     <script src="/inputSterilisation.js"></script>
+    <script src="/qr"></script>
 
 </head>
 
@@ -19,20 +20,24 @@
         <button onclick="redirectToLogin()">Go to Login</button>
       </div>
       
-    <div class="AuthForm">
-        <h1>Register</h1>
-        <form onsubmit="getRegistration(); return false;">
-            <label htmlfor="Name">Name</label>
-            <input class="textBox" type="text" id="Name" name="name" placeholder="">
-            <label htmlfor="userName">User Name</label>
-            <input class="textBox" type="text" id="userName" name="userName" placeholder="">
-            <label htmlfor="email">Email</label>
-            <input class="textBox" type="email" id="email" name="email" placeholder="name@provider.com">
-            <label htmlfor="pasword">Password</label>
-            <input class="textBox" type="password" id="password" name="password" placeholder="******">            
-            <input type="submit" value="Register" id="Register">
-        </form>
-        <a href="/">Already have an account?</a>
+    <div id="containter">
+        <div id="qr"></div>
+        <div id="authform" class="AuthForm">
+            <h1>Register</h1>
+            <form onsubmit="getRegistration(); return false;">
+                <label htmlfor="Name">Name</label>
+                <input class="textBox" type="text" id="Name" name="name" placeholder="">
+                <label htmlfor="userName">User Name</label>
+                <input class="textBox" type="text" id="userName" name="userName" placeholder="">
+                <label htmlfor="email">Email</label>
+                <input class="textBox" type="email" id="email" name="email" placeholder="name@provider.com">
+                <label htmlfor="pasword">Password</label>
+                <input class="textBox" type="password" id="password" name="password" placeholder="******">            
+                <input type="submit" value="Register" id="Register">
+            </form>
+            <a href="/">Already have an account?</a>
+        </div>
     </div>
+    
 </body>
 </html>
