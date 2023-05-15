@@ -54,6 +54,27 @@ blog.get("/posts", dosLimiter, async (res, req) => {
     req.send(JSON.stringify((data = { posts: data.rows, id: user_id })));
 });
 
+
+blog.post('/deleteRequest',dosLimiter,async(req,res)=>{
+    const user_id = Number(req.session.user_id)
+    const post_id = Number(req.body.post_id)
+
+    const {rows} = await database.query(`select user_id from user_data.posts where post_id = $1`,
+    [post_id])
+    
+    if (rows[0].user_id!=user_id){
+        res.status(404).send()
+        return
+    }
+
+    try{
+    await database.query(`delete from user_data.posts where post_id = $1`,
+    [post_id])    
+        res.status(200).send()
+        getPosts()
+    }catch(error){
+        res.status(404).send()
+    }};
 blog.post("/updateRequest", dosLimiter, async (req, res) => {
     const user_id = Number(req.session.user_id);
     const post_id = Number(req.body.post_id);
@@ -66,24 +87,11 @@ blog.post("/updateRequest", dosLimiter, async (req, res) => {
         res.redirect("/blog/updatePost");
     } else {
         res.status(404).send();
+
     }
 });
 
-blog.post("/deleteRequest", dosLimiter, async (req, res) => {
-    const user_id = Number(req.session.user_id);
-    const post_id = Number(req.body.post_id);
 
-    try {
-        data = await database.query(
-            `delete from user_data.posts where post_id = $1`,
-            [post_id]
-        );
-        res.status(200).send();
-        getPosts();
-    } catch (error) {
-        res.status(404).send();
-    }
-});
 
 blog.post("/createPost", dosLimiter, async (req, res) => {
     try {
@@ -103,40 +111,6 @@ blog.post("/createPost", dosLimiter, async (req, res) => {
     }
 });
 
-blog.post("/updatePost", dosLimiter, async (req, res) => {
-    const user_id = Number(req.session.user_id);
-    const post_id = Number(req.body.post_id);
-
-    data = await database.query(
-        `select user_id from user_data.posts where post_id = $1`,
-        [post_id]
-    );
-
-    if (data.rows[0].user_id != user_id) {
-        res.status(404).send();
-    } else {
-        try {
-            await database.query(
-                `update user_data.posts
-            set title = $1,
-            body = $2,
-            updated_at = current_date
-            where post_id = $3`,
-                [
-                    steraliseInput(req.body.title),
-                    steraliseInput(req.body.body),
-                    post_id,
-                ]
-            );
-
-            res.redirect("/blog");
-        } catch (err) {
-            console.log("ran");
-            console.error(err);
-            res.status(404).send();
-        }
-    }
-});
 
 blog.post("/search", dosLimiter, async (req, res) => {
     user_id = req.session.user_id;
