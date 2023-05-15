@@ -26,13 +26,13 @@
             <h1>Register</h1>
             <form onsubmit="getRegistration(); return false;">
                 <label htmlfor="Name">Name</label>
-                <input class="textBox" type="text" id="Name" name="name" placeholder="">
+                <input class="textBox" type="text" id="Name" name="name" placeholder="" required>
                 <label htmlfor="userName">User Name</label>
-                <input class="textBox" type="text" id="userName" name="userName" placeholder="">
+                <input class="textBox" type="text" id="userName" name="userName" placeholder="" required>
                 <label htmlfor="email">Email</label>
-                <input class="textBox" type="email" id="email" name="email" placeholder="name@provider.com">
+                <input class="textBox" type="email" id="email" name="email" placeholder="name@provider.com" required>
                 <label htmlfor="pasword">Password</label>
-                <input class="textBox" type="password" id="password" name="password" placeholder="******">            
+                <input class="textBox" type="password" id="password" name="password" placeholder="******" required>            
                 <input type="submit" value="Register" id="Register">
             </form>
             <a href="/">Already have an account?</a>
