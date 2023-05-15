@@ -1,5 +1,6 @@
 steraliseInput = (input) => {
 
+    //explicit converstion to a string
     input = input.toString()
 
     // Remove any HTML tags from the input this is done removing
