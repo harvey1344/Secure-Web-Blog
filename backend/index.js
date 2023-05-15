@@ -2,6 +2,7 @@ const express = require("express");
 const session = require("express-session");
 const CryptoJS = require("crypto-js");
 const https = require("https");
+const rateLimit = require("express-rate-limit");
 const fs = require("fs");
 require("dotenv").config({ path: "./config.env" });
 
@@ -11,7 +12,6 @@ const blog = require("./blog");
 const { config } = require("dotenv");
 
 // set up server
-const PORT = 5000;
 const app = express();
 
 // middleware
