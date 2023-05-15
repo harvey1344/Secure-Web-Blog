@@ -58,8 +58,16 @@ blog.post('/deleteRequest',async(req,res)=>{
     const user_id = Number(req.session.user_id)
     const post_id = Number(req.body.post_id)
 
+    const {rows} = await database.query(`select user_id from user_data.posts where post_id = $1`,
+    [post_id])
+    
+    if (rows[0].user_id!=user_id){
+        res.status(404).send()
+        return
+    }
+
     try{
-    data = await database.query(`delete from user_data.posts where post_id = $1`,
+    await database.query(`delete from user_data.posts where post_id = $1`,
     [post_id])    
         res.status(200).send()
         getPosts()

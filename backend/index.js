@@ -46,7 +46,7 @@ app.get("/hashing", (req, res) => {
 
 app.use("/", login);
 
-app.use("/blog", checkForIpChange, checkAuthenticated, blog);
+app.use("/blog", checkSessionValidity, checkAuthenticated, blog);
 
 app.get("/main.css", function (req, res) {
     res.sendFile("main.css", { root: "../frontend" });
@@ -100,12 +100,12 @@ function checkAuthenticated(req, res, next) {
     }
 }
 
-function checkForIpChange(req, res, next) {
+function checkSessionValidity(req, res, next) {
+    let timeSinceLastRequest = performance.now() - req.session.lastRequest
     user_ip = CryptoJS.SHA256(req.socket.remoteAddress).toString();
 
-    if (req.session.user_ip == user_ip) {
-        next();
-    } else {
+
+    if (req.session.user_ip != user_ip) {
         console.log("ip changed");
         req.session.destroy((err) => {
             if (err) {
@@ -114,8 +114,26 @@ function checkForIpChange(req, res, next) {
                 res.redirect("/");
             }
         });
+        return
     }
+
+    if(timeSinceLastRequest>(1000*60*30)){// 5 mins
+        console.log("session innactive");
+        req.session.destroy((err) => {
+            if (err) {
+                console.log("error");
+            } else {
+                res.redirect("/");
+            }
+        });
+        return
+    }
+    req.session.lastRequest = performance.now()
+    next();
 }
+
+  
+
 
 const httpsOptions = {
     key: fs.readFileSync("./certificates/key.pem"),
