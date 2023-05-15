@@ -3,7 +3,10 @@ const session = require('express-session');
 const CryptoJS = require('crypto-js');
 const https = require('https');
 const fs = require('fs');
-require('dotenv').config({ path: './config.env' });
+require('dotenv').config({ path: './backend/config.env' });
+
+const cookieParser = require('cookie-parser');
+const csrf = require('csurf');
 
 const users = require('./users');
 const login = require('./login');
@@ -13,7 +16,7 @@ const { config } = require('dotenv');
 // set up server
 const PORT = 5000;
 const app = express();
-
+const csrfProtection = csrf({ cookie: true });
 // middleware
 app.use((req, res, next) => {
     if (req.protocol === 'http') {
@@ -23,6 +26,9 @@ app.use((req, res, next) => {
     }
 });
 
+
+
+app.use(cookieParser());
 app.use(express.json());
 
 app.use(
@@ -39,41 +45,57 @@ app.use(
     })
 );
 
+app.use(csrfProtection);
+ app.use((req, res, next) =>{
+     res.setHeader('X-CSRF-Token', req.csrfToken());
+     next();
+ })
+
 // express routers
 app.get('/hashing', (req, res) => {
-    res.sendFile('bower_components/crypto-js/crypto-js.js', { root: '../' });
+    res.sendFile('./DSS/bower_components/crypto-js/crypto-js.js', { root: '../' });
 });
-
+app.get('/csrf-token', (req, res) => {
+    res.json({ csrfToken: req.csrfToken() });
+});
 app.use('/', login);
+
+//app.use('/login', csrfProtection, login)
 
 app.use('/blog', checkForIpChange, checkAuthenticated, blog);
 
 app.get('/main.css', function (req, res) {
-    res.sendFile('main.css', { root: '../frontend' });
+    res.sendFile('main.css', { root: './frontend' });
 });
 
 app.get('/inputSterilisation.js', function (req, res) {
-    res.sendFile('inputSterilisation.js', { root: '../frontend' });
+    res.sendFile('inputSterilisation.js', { root: './frontend' });
 });
 
 app.get('/register.js', function (req, res) {
-    res.sendFile('register.js', { root: '../frontend' });
+    res.sendFile('register.js', { root: './frontend' });
 });
 
 app.get('/login.js', function (req, res) {
-    res.sendFile('login.js', { root: '../frontend' });
+    //res.render('login', {csrfToken: req.csrfToken()});
+    // res.setHeader('CSRF-Token', req.csrfToken());
+    // res.setHeader('csrfToken', req.csrfToken());
+    res.sendFile('login.js', { root: './frontend' });
+});
+app.get('/csrf-token', (req, res) => {
+    res.send(req.csrfToken());
 });
 
 app.get('/blog.js', (req, res) => {
-    res.sendFile('blog.js', { root: '../frontend' });
+    res.sendFile('blog.js', { root: './frontend' });
 });
 
 app.get('/toppwd.text', function (req, res) {
-    res.sendFile('100pwd.txt', { root: '../' });
+    res.sendFile('100pwd.txt', { root: '../DSS' });
 });
 
 app.get('/bad', function (req, res) {
-    res.sendFile('/bad.html', { root: '../frontend' });
+    res.sendFile('/bad.html', { root: './DSS/frontend' });
 });
 
 app.get('/logout', checkAuthenticated, function(req,res){
@@ -85,7 +107,7 @@ app.get('/logout', checkAuthenticated, function(req,res){
         }
     })
 })
-
+// added csrf
 app.use('/register', users);
 
 function checkAuthenticated(req, res, next) {
@@ -115,8 +137,8 @@ function checkForIpChange(req, res, next) {
 }
 
 const httpsOptions = {
-    key: fs.readFileSync('./certificates/key.pem'),
-    cert: fs.readFileSync('./certificates/cert.pem'),
+    key: fs.readFileSync('./backend/certificates/key.pem'),
+    cert: fs.readFileSync('./backend/certificates/cert.pem'),
 };
 
 const httpsServer = https.createServer(httpsOptions, app);

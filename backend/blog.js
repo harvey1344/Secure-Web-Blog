@@ -7,23 +7,23 @@ const CryptoJS = require("crypto-js");
 require('dotenv').config({ path: './config.env' });
 
 blog.get('/', (req, res) => {
-    res.sendFile('blog.html', { root: '../frontend' });
+    res.sendFile('blog.html', { root: './frontend' });
 });
 
 blog.get('/updatePost',(req, res) => {
-    res.sendFile('updatePost.html', { root: '../frontend' });
+    res.sendFile('updatePost.html', { root: './frontend' });
 });
 
 blog.get('/updatePost.js', (req, res) => {
-    res.sendFile('updatePost.js', { root: '../frontend' });
+    res.sendFile('updatePost.js', { root: './frontend' });
 });
 
 blog.get('/createPost',(req, res) => {
-    res.sendFile('createPost.html', { root: '../frontend' });
+    res.sendFile('createPost.html', { root: './frontend' });
 });
 
 blog.get('/createPost.js', (req, res) => {
-    res.sendFile('createPost.js', { root: '../frontend' });
+    res.sendFile('createPost.js', { root: './frontend' });
 });
 
 blog.get('/posts',async(res,req)=>{
