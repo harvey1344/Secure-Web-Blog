@@ -18,13 +18,10 @@ async function createdb() {
         user_id serial NOT NULL,
         name varchar,
         user_name varchar,
-        user_name_hash varchar,
         email_address varchar,
-        email_hash varchar,
         password varchar,
         salt varchar,
         twoFA varchar,
-        encryption_key varchar,
         constraint pk_users PRIMARY KEY (
             user_id
             )

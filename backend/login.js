@@ -83,8 +83,8 @@ login.post("/login", loginLimiter, jsonParser, async (req, res) => {
 
     // return the row if the user exits in the database
     const { rows } = await database.query(
-        "SELECT * FROM user_data.users WHERE user_name_hash = $1",
-        [CryptoJS.SHA256(userName).toString()]
+        "SELECT * FROM user_data.users WHERE user_name = $1",
+        [userName]
     );
 
     if (!(rows.length > 0)) {
@@ -102,12 +102,11 @@ login.post("/login", loginLimiter, jsonParser, async (req, res) => {
     }
 
     const user = rows[0];
-    encryptionKey = CryptoJS.AES.decrypt(user.encryption_key,process.env.ENCRYPTION_KEY).toString(CryptoJS.enc.Utf8);
-    daSalt = CryptoJS.AES.decrypt(user.salt,encryptionKey).toString(CryptoJS.enc.Utf8);
+    daSalt = CryptoJS.AES.decrypt(user.salt,process.env.ENCRYPTION_KEY).toString(CryptoJS.enc.Utf8);
     daPwd = user.password;
     daPwdSalted = password + daSalt;
     daHashed = CryptoJS.SHA256(daPwdSalted).toString();
-    token = CryptoJS.AES.decrypt(user.twofa,encryptionKey).toString(CryptoJS.enc.Utf8);
+    token = CryptoJS.AES.decrypt(user.twofa,process.env.ENCRYPTION_KEY).toString(CryptoJS.enc.Utf8);
 
     let timeOne = performance.now();
 

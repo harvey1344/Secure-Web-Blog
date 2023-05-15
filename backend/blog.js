@@ -37,11 +37,6 @@ blog.get('/posts',async(res,req)=>{
     inner join user_data.users on posts.user_id = users.user_id
     order by created_at`)
 
-    for (const row of data.rows) {
-        const res = await database.query('SELECT encryption_key FROM user_data.users WHERE user_id = $1', [row.user_id]);
-        const key = CryptoJS.AES.decrypt(res.rows[0].encryption_key, process.env.ENCRYPTION_KEY).toString(CryptoJS.enc.Utf8);
-        row.user_name = CryptoJS.AES.decrypt(row.user_name, key).toString(CryptoJS.enc.Utf8);
-      }
     req.send(JSON.stringify(data = {posts:data.rows, id :user_id}))
 })
 
@@ -136,11 +131,7 @@ blog.post('/search',async(req,res)=>{
   ORDER BY created_at
 `, [searchText]);
 
-    for (const row of data.rows) {
-        const res = await database.query('SELECT encryption_key FROM user_data.users WHERE user_id = $1', [row.user_id]);
-        const key = CryptoJS.AES.decrypt(res.rows[0].encryption_key, process.env.ENCRYPTION_KEY).toString(CryptoJS.enc.Utf8);
-        row.user_name = CryptoJS.AES.decrypt(row.user_name, key).toString(CryptoJS.enc.Utf8);
-      }
+
     res.send(JSON.stringify(data = {posts:data.rows, id :user_id}))
 
 })

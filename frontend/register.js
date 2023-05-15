@@ -64,7 +64,7 @@ const getRegistration = async () => {
         .then(function (res) {
             if (!res.ok) {
                 // Registration failed
-                alert("User faul");
+                alert("Username or email in use. Please check if you allready have an account.");
                 return Promise.reject(new Error("Registration failed"));
             } else {
                 return res.json();
@@ -141,8 +141,8 @@ const generateSalt = (length) => {
     return salt;
 };
 
-function redirectToBlog() {
-    window.location.href = "/blog";
+function redirectToLogin() {
+    window.location.href = "/";
 }
 
 module.exports.getPasswords = getPasswords;
