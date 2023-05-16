@@ -35,9 +35,9 @@ const loginRequest = () => {
         })
         .then(response => {
           if (!response.ok) {
-            throw new Error("Network response not ok");
+            return response.text().then(error => { throw new Error(error) });
           }
-          return response.text(); // Parse response as text
+          return response.json(); // Parse response as text
         })
         .then(text => {
           // Handle successful response
