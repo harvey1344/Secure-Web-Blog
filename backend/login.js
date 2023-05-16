@@ -1,40 +1,3 @@
-// recording timings for types of authentication
-let ammountOfReadingsStored = 300;
-
-let avePasswordComparison = 1;
-let PasswordComparisonData = [];
-
-function pushToPasswordComparisonData(element) {
-    if (PasswordComparisonData.length === ammountOfReadingsStored) {
-        PasswordComparisonData.shift();
-    }
-    PasswordComparisonData.push(element);
-
-    let total = 0;
-    PasswordComparisonData.forEach((number) => {
-        total = total + number;
-    });
-
-    avePasswordComparison = total / pushToPasswordComparisonData.length;
-}
-
-let aveTwoFa = 1;
-let TwoFaData = [];
-
-function pushToTwoFaData(element) {
-    if (TwoFaData.length === TwoFaData) {
-        TwoFaData.shift();
-    }
-    TwoFaData.push(element);
-
-    let total = 0;
-    TwoFaData.forEach((number) => {
-        total = total + number;
-    });
-
-    aveTwoFa = total / TwoFaData.length;
-}
-
 /*
  * Author: Harvey Thompson Jack BAiley
  * Date: 27/03/2023
@@ -55,6 +18,46 @@ const steraliseInput = require("./inputSterilisation");
 require('dotenv').config({ path: './config.env' });
 
 
+// recording timings for types of authentication
+let ammountOfReadingsStored = 300;
+
+let avgPasswordComparison = 1;
+let PasswordComparisonData = [];
+
+function pushToPasswordComparisonData(element) {
+    if (PasswordComparisonData.length === ammountOfReadingsStored) {
+        PasswordComparisonData.shift();
+    }
+    PasswordComparisonData.push(element);
+
+    let total = 0;
+    PasswordComparisonData.forEach((number) => {
+        total = total + number;
+    });
+
+    avgPasswordComparison = total / pushToPasswordComparisonData.length;
+}
+
+let avgTwoFa = 1;
+let TwoFaData = [];
+
+function pushToTwoFaData(element) {
+    if (TwoFaData.length === TwoFaData) {
+        TwoFaData.shift();
+    }
+    TwoFaData.push(element);
+
+    let total = 0;
+    TwoFaData.forEach((number) => {
+        total = total + number;
+    });
+
+    avgTwoFa = total / TwoFaData.length;
+}
+
+
+
+
 // limit the number of login attempts from the same IP address
 // uses the express-rate-limit package
 const loginLimiter = rateLimit({
@@ -66,7 +69,7 @@ const loginLimiter = rateLimit({
 login.get("/", (req, res) => {
     // crsf token added to response
     //res.locals.csrfToken = req.csrfToken();
-    res.sendFile("login.html", { root: "./frontend" });
+    res.sendFile("login.html", { root: "../frontend" });
 });
 
 login.post("/login", loginLimiter, jsonParser, async (req, res) => {
@@ -86,8 +89,8 @@ login.post("/login", loginLimiter, jsonParser, async (req, res) => {
 
     // return the row if the user exits in the database
     const { rows } = await database.query(
-        "SELECT * FROM user_data.users WHERE user_name_hash = $1",
-        [CryptoJS.SHA256(userName).toString()]
+        "SELECT * FROM user_data.users WHERE user_name = $1",
+        [userName]
     );
 
     if (!(rows.length > 0)) {
@@ -99,18 +102,17 @@ login.post("/login", loginLimiter, jsonParser, async (req, res) => {
             res.status(404).send({
                 message: `Details did not match, try again. You have ${attemptsLeft} attempts left.`,
             });
-        }, aveTwoFa + avePasswordComparison);
+        }, avgTwoFa + avgPasswordComparison);
 
         return;
     }
 
     const user = rows[0];
-    encryptionKey = CryptoJS.AES.decrypt(user.encryption_key,process.env.ENCRYPTION_KEY).toString(CryptoJS.enc.Utf8);
-    daSalt = CryptoJS.AES.decrypt(user.salt,encryptionKey).toString(CryptoJS.enc.Utf8);
+    daSalt = CryptoJS.AES.decrypt(user.salt,process.env.ENCRYPTION_KEY).toString(CryptoJS.enc.Utf8);
     daPwd = user.password;
     daPwdSalted = password + daSalt;
     daHashed = CryptoJS.SHA256(daPwdSalted).toString();
-    token = CryptoJS.AES.decrypt(user.twofa,encryptionKey).toString(CryptoJS.enc.Utf8);
+    token = CryptoJS.AES.decrypt(user.twofa,process.env.ENCRYPTION_KEY).toString(CryptoJS.enc.Utf8);
 
     let timeOne = performance.now();
 
@@ -123,7 +125,7 @@ login.post("/login", loginLimiter, jsonParser, async (req, res) => {
             res.status(404).send({
                 message: `Details did not match, try again. You have ${attemptsLeft} attempts left.`,
             });
-        }, aveTwoFa);
+        }, avgTwoFa);
 
         return;
     }
@@ -143,6 +145,7 @@ login.post("/login", loginLimiter, jsonParser, async (req, res) => {
     // attaches the user id to the session
     req.session.user_ip = CryptoJS.SHA256(req.socket.remoteAddress).toString();
     req.session.user_id = user.user_id;
+    req.session.lastRequest = performance.now()
     req.session.save();
     res.status(200).send("Login successful");
 
