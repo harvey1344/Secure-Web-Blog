@@ -1,5 +1,10 @@
 sanitizeInput = (input) => {
 
+  if (input === null || input === undefined) {
+    return '';
+  }
+
+
   //explicit converstion to a string
   input = input.toString()
 
