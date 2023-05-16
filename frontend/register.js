@@ -16,7 +16,9 @@ const getPasswords = async () => {
 const getRegistration = async () => {
     // get array of top passwords from function
     let pwdArray = await getPasswords();
+    console.log(typeof pwdArray)
     pwdArray = pwdArray.map((pwd) => pwd.trim());
+    
 
     // get the user details from the form
     let name = document.getElementById("Name").value;

@@ -27,9 +27,9 @@ const updateRequest=()=>{
             'Content-type': 'application/json; charset=UTF-8',
         },
     }).then(res=>{
-        if (res.redirected) {
-            console.log('redirecting to post update');
-            window.location.href = res.url
+        if (res.ok) {
+            alert("update sucessfull")
+            window.location.href = "/blog"
         } else {
             // Registration failed
             alert("unable to update");

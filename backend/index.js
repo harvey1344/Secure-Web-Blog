@@ -34,7 +34,7 @@ app.use(
             secure: true, // Ensures cookies are only sent over HTTPS
             httpOnly: true, // Prevents client-side JavaScript from accessing the cookie
             sameSite: "strict", // Restricts the cookie to be sent only with same-site requests
-            maxAge: 60 * 60 * 24, // expiration time 1 day
+            maxAge: 1000 * 60 * 60 * 24, // expiration time 1 day
         },
     })
 );
@@ -130,9 +130,7 @@ function checkSessionValidity(req, res, next) {
     }
     req.session.lastRequest = performance.now()
     next();
-}
-
-  
+}  
 
 
 const httpsOptions = {

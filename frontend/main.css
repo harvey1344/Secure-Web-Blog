@@ -12,9 +12,9 @@ body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding: 60px 175px;
+    padding: 60px 100px;
     max-width: 100px;
-    margin: 100px 580px;
+    margin: 50px 50px;
     border: 5px solid #da0037;
     border-radius: 20px;
   }
@@ -235,4 +235,36 @@ a[href="/blog/createPost"] {
   #authform {
     flex: 1 1 auto;
   }
+
+  
+.container {
+  display: flex;
+  flex-direction: row;
+}
+
+.password-requirements {
+  background-color: #444444;
+  border-radius: 1px;
+  padding: 10px;
+  color: #ededed;
+  margin: 10px;
+  font-size: 14px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.password-requirements > h2 {
+  margin-top: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
+
+  
+  
+
   

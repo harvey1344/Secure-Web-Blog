@@ -1,40 +1,3 @@
-// recording timings for types of authentication
-let ammountOfReadingsStored = 300;
-
-let avePasswordComparison = 1;
-let PasswordComparisonData = [];
-
-function pushToPasswordComparisonData(element) {
-    if (PasswordComparisonData.length === ammountOfReadingsStored) {
-        PasswordComparisonData.shift();
-    }
-    PasswordComparisonData.push(element);
-
-    let total = 0;
-    PasswordComparisonData.forEach((number) => {
-        total = total + number;
-    });
-
-    avePasswordComparison = total / pushToPasswordComparisonData.length;
-}
-
-let aveTwoFa = 1;
-let TwoFaData = [];
-
-function pushToTwoFaData(element) {
-    if (TwoFaData.length === TwoFaData) {
-        TwoFaData.shift();
-    }
-    TwoFaData.push(element);
-
-    let total = 0;
-    TwoFaData.forEach((number) => {
-        total = total + number;
-    });
-
-    aveTwoFa = total / TwoFaData.length;
-}
-
 /*
  * Author: Harvey Thompson Jack BAiley
  * Date: 27/03/2023
@@ -53,6 +16,46 @@ const CryptoJS = require("crypto-js");
 const twofactor = require("node-2fa");
 const steraliseInput = require("./inputSterilisation");
 require('dotenv').config({ path: './config.env' });
+
+
+// recording timings for types of authentication
+let ammountOfReadingsStored = 300;
+
+let avgPasswordComparison = 1;
+let PasswordComparisonData = [];
+
+function pushToPasswordComparisonData(element) {
+    if (PasswordComparisonData.length === ammountOfReadingsStored) {
+        PasswordComparisonData.shift();
+    }
+    PasswordComparisonData.push(element);
+
+    let total = 0;
+    PasswordComparisonData.forEach((number) => {
+        total = total + number;
+    });
+
+    avgPasswordComparison = total / pushToPasswordComparisonData.length;
+}
+
+let avgTwoFa = 1;
+let TwoFaData = [];
+
+function pushToTwoFaData(element) {
+    if (TwoFaData.length === TwoFaData) {
+        TwoFaData.shift();
+    }
+    TwoFaData.push(element);
+
+    let total = 0;
+    TwoFaData.forEach((number) => {
+        total = total + number;
+    });
+
+    avgTwoFa = total / TwoFaData.length;
+}
+
+
 
 
 // limit the number of login attempts from the same IP address
@@ -96,7 +99,7 @@ login.post("/login", loginLimiter, jsonParser, async (req, res) => {
             res.status(404).send({
                 message: `Details did not match, try again. You have ${attemptsLeft} attempts left.`,
             });
-        }, aveTwoFa + avePasswordComparison);
+        }, avgTwoFa + avgPasswordComparison);
 
         return;
     }
@@ -119,7 +122,7 @@ login.post("/login", loginLimiter, jsonParser, async (req, res) => {
             res.status(404).send({
                 message: `Details did not match, try again. You have ${attemptsLeft} attempts left.`,
             });
-        }, aveTwoFa);
+        }, avgTwoFa);
 
         return;
     }

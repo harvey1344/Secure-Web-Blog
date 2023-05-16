@@ -13,7 +13,7 @@ const {
     getPasswords,
     isPasswordCommon,
     isPasswordStrong,
-} = require('../frontend/home.js');
+} = require('../frontend/register.js');
 
 describe('getPasswords', () => {
     it('should return an array of passwords', async () => {
