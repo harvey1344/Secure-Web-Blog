@@ -43,7 +43,7 @@ const getRegistration = async () => {
     // salt the password before hashing
     // appened salt after pwd
     const salt = generateSalt(10);
-    const saltedPassword = password + salt; // concatenate password and salt
+    const saltedPassword = password + salt;
     const hash = CryptoJS.SHA256(saltedPassword).toString();
     // send user details to database with use of fetch API
     fetch("/register", {

@@ -101,9 +101,8 @@ function checkAuthenticated(req, res, next) {
 }
 
 function checkSessionValidity(req, res, next) {
-    let timeSinceLastRequest = performance.now() - req.session.lastRequest
+    let timeSinceLastRequest = performance.now() - req.session.lastRequest;
     user_ip = CryptoJS.SHA256(req.socket.remoteAddress).toString();
-
 
     if (req.session.user_ip != user_ip) {
         console.log("ip changed");
@@ -114,10 +113,11 @@ function checkSessionValidity(req, res, next) {
                 res.redirect("/");
             }
         });
-        return
+        return;
     }
 
-    if(timeSinceLastRequest>(1000*60*30)){// 5 mins
+    if (timeSinceLastRequest > 1000 * 60 * 60) {
+        // 1 hour
         console.log("session innactive");
         req.session.destroy((err) => {
             if (err) {
@@ -126,12 +126,11 @@ function checkSessionValidity(req, res, next) {
                 res.redirect("/");
             }
         });
-        return
+        return;
     }
-    req.session.lastRequest = performance.now()
+    req.session.lastRequest = performance.now();
     next();
-}  
-
+}
 
 const httpsOptions = {
     key: fs.readFileSync("./certificates/key.pem"),

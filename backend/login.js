@@ -15,8 +15,7 @@ const rateLimit = require("express-rate-limit");
 const CryptoJS = require("crypto-js");
 const twofactor = require("node-2fa");
 const steraliseInput = require("./inputSterilisation");
-require('dotenv').config({ path: './config.env' });
-
+require("dotenv").config({ path: "./config.env" });
 
 // recording timings for types of authentication
 let ammountOfReadingsStored = 300;
@@ -55,13 +54,10 @@ function pushToTwoFaData(element) {
     avgTwoFa = total / TwoFaData.length;
 }
 
-
-
-
 // limit the number of login attempts from the same IP address
 // uses the express-rate-limit package
 const loginLimiter = rateLimit({
-    windowMs: 10 * 60 * 1000,
+    windowMs: 60 * 60 * 1000,
     max: 5,
 });
 
@@ -91,7 +87,7 @@ login.post("/login", loginLimiter, jsonParser, async (req, res) => {
     );
 
     if (!(rows.length > 0)) {
-        console.log("no user name found")
+        console.log("no user name found");
         // handle case when no user was found
         const attemptsLeft = res.getHeader("X-RateLimit-Remaining");
 
@@ -105,17 +101,23 @@ login.post("/login", loginLimiter, jsonParser, async (req, res) => {
     }
 
     const user = rows[0];
-    daSalt = CryptoJS.AES.decrypt(user.salt,process.env.ENCRYPTION_KEY).toString(CryptoJS.enc.Utf8);
+    daSalt = CryptoJS.AES.decrypt(
+        user.salt,
+        process.env.ENCRYPTION_KEY
+    ).toString(CryptoJS.enc.Utf8);
     daPwd = user.password;
     daPwdSalted = password + daSalt;
     daHashed = CryptoJS.SHA256(daPwdSalted).toString();
-    token = CryptoJS.AES.decrypt(user.twofa,process.env.ENCRYPTION_KEY).toString(CryptoJS.enc.Utf8);
+    token = CryptoJS.AES.decrypt(
+        user.twofa,
+        process.env.ENCRYPTION_KEY
+    ).toString(CryptoJS.enc.Utf8);
 
     let timeOne = performance.now();
 
     if (!(daHashed === daPwd)) {
         // handle case when password does not match
-        console.log("password no match")
+        console.log("password no match");
         const attemptsLeft = res.getHeader("X-RateLimit-Remaining");
 
         setTimeout(() => {
@@ -142,7 +144,7 @@ login.post("/login", loginLimiter, jsonParser, async (req, res) => {
     // attaches the user id to the session
     req.session.user_ip = CryptoJS.SHA256(req.socket.remoteAddress).toString();
     req.session.user_id = user.user_id;
-    req.session.lastRequest = performance.now()
+    req.session.lastRequest = performance.now();
     req.session.save();
     res.status(200).send("Login successful");
 
