@@ -16,9 +16,8 @@ const getPasswords = async () => {
 const getRegistration = async () => {
     // get array of top passwords from function
     let pwdArray = await getPasswords();
-    console.log(typeof pwdArray)
+    console.log(typeof pwdArray);
     pwdArray = pwdArray.map((pwd) => pwd.trim());
-    
 
     // get the user details from the form
     let name = document.getElementById("Name").value;
@@ -80,21 +79,21 @@ const getRegistration = async () => {
             console.log(typeof code);
             console.log("Registration successful");
             // Registration successful
-            var qr = qrcode(4, "L");
+            let qr = qrcode(4, "L");
             qr.addData(code.toUpperCase());
             qr.make();
 
             // Create an image element with the QR code data
-            var imgElement = document.createElement("img");
+            let imgElement = document.createElement("img");
             imgElement.src = qr.createDataURL();
 
             // Set the desired size for the QR code
-            var size = 300; // Adjust the size as per your requirement
+            let size = 300; // Adjust the size as per your requirement
             imgElement.style.width = size + "px";
             imgElement.style.height = size + "px";
 
             // Get the container elements
-            var qrContainer = document.getElementById("qr");
+            let qrContainer = document.getElementById("qr");
 
             // Append the image to the QR code container
             qrContainer.appendChild(imgElement);
@@ -140,7 +139,7 @@ const isPasswordStrong = (password) => {
 
 function showSuccessAlert() {
     // Show the alert
-    var alertBox = document.getElementById("alert");
+    let alertBox = document.getElementById("alert");
     alertBox.style.display = "block";
 
     // Hide the alert after 2 mins
@@ -150,16 +149,11 @@ function showSuccessAlert() {
     }, 120000);
 }
 
-function closeAlert() {
-    var alertBox = document.getElementById("alert");
-    alertBox.style.display = "none";
-}
-
 const generateSalt = (length) => {
-    var chars =
+    let chars =
         "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    var salt = "";
-    for (var i = 0; i < length; i++) {
+    let salt = "";
+    for (let i = 0; i < length; i++) {
         salt += chars.charAt(Math.floor(Math.random() * chars.length));
     }
     return salt;
