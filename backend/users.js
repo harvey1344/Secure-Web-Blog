@@ -20,62 +20,52 @@ user.get("/", (req, res) => {
 user.post("/", jsonParser, async (req, res) => {
     let name = steraliseInput(req.body.name);
     let userName = steraliseInput(req.body.userName);
-    let userNameHash = CryptoJS.SHA256(userName).toString();
     let email = steraliseInput(req.body.email);
-    let emailHash = CryptoJS.SHA256(email).toString();
     let password = steraliseInput(req.body.hash);
     let salt = req.body.salt;
     let twoFA = twofactor.generateSecret({
         name: "blog",
         account: email,
-    }).secret; // needs encryption!!!
+    }).secret; 
 
-    // Generate a random key
-    const keySize = 256; // 256 bits
-    const key = CryptoJS.lib.WordArray.random(keySize / 8); // 8 bits per byte
-
-    // Convert the key to a string representation
-    const keyString = key.toString();
 
     // Check if the email already exists in the database
     const { rows } = await database.query(
-        `SELECT * FROM user_data.users WHERE email_hash = $1 OR user_name_hash = $2`,
-        [emailHash, userNameHash]
+        `SELECT * FROM user_data.users WHERE user_name = $1`,
+        [userName]
     );
 
+    data = await database.query(`select email_address from user_data.users`)
+
+    emails = data.rows
+
+    emails = emails.map((email) => {
+        const decryptedEmail = CryptoJS.AES.decrypt(email.email_address, process.env.ENCRYPTION_KEY).toString(CryptoJS.enc.Utf8);
+        email.email_address = decryptedEmail; // Update the email_address property with the decrypted value
+        return email; // Return the updated email object
+    });
+
+
     if (rows.length > 0) {
-        // User with email or username already exists in the database
-        if (rows[0].email_hash === emailHash) {
-            // Email address already registered
-            res.status(409).send(
-                JSON.stringify({ message: "Email allready registerd." })
-            );
-            return;
-        } else {
-            // Username is taken but email is available
-            res.status(409).send(
-                JSON.stringify({ message: "Username allready Taken." })
-            );
-            return;
-        }
+        res.status(409).send();
+        return
+    }else if(emails.includes(email)){
+        res.status(409).send();
+        return
     }
+
+
     // Email address and username are available, insert new record
     await database.query(
-        `INSERT INTO user_data.users (name,user_name,user_name_hash, email_address,email_hash, password, salt, twoFA, encryption_key) 
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+        `INSERT INTO user_data.users (name,user_name, email_address, password, salt, twoFA) 
+            VALUES ($1, $2, $3, $4, $5, $6)`,
         [
-            CryptoJS.AES.encrypt(name, keyString).toString(),
-            CryptoJS.AES.encrypt(userName, keyString).toString(),
-            userNameHash,
-            CryptoJS.AES.encrypt(email, keyString).toString(),
-            emailHash,
+            CryptoJS.AES.encrypt(name, process.env.ENCRYPTION_KEY).toString(),
+            userName,            
+            CryptoJS.AES.encrypt(email, process.env.ENCRYPTION_KEY).toString(),
             password,
-            CryptoJS.AES.encrypt(salt, keyString).toString(),
-            CryptoJS.AES.encrypt(twoFA, keyString).toString(),
-            CryptoJS.AES.encrypt(
-                keyString,
-                process.env.ENCRYPTION_KEY
-            ).toString(),
+            CryptoJS.AES.encrypt(salt, process.env.ENCRYPTION_KEY).toString(),  
+            CryptoJS.AES.encrypt(twoFA, process.env.ENCRYPTION_KEY).toString(),            
         ]
     );
     console.log(email, password, "user registered");

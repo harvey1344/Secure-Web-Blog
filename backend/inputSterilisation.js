@@ -1,7 +1,12 @@
-steraliseInput = (input) => {
+const steraliseInput = (input) => {
 
-    //explicit converstion to a string
-    input = input.toString()
+  if (input === null || input === undefined) {
+    return '';
+  }
+
+
+  //explicit converstion to a string
+  input = input.toString()
 
     // Remove any HTML tags from the input this is done removing
     // opening and closing angle brakets
@@ -30,4 +35,4 @@ steraliseInput = (input) => {
     return xssSafeInput;
   }
 
-  module.exports = steraliseInput
+module.exports = steraliseInput;

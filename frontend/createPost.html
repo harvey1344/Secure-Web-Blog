@@ -12,9 +12,9 @@
     <h1>Create Post</h1>
         <form onsubmit="createPost(); return false;">
             <label htmlfor="title">Title</Title></label>
-            <input class="textBox" type="text" id="title" name="title" placeholder="">
+            <input class="textBox" type="text" id="title" name="title" placeholder="" required>
             <label htmlfor="body">Body</label>
-            <input class="textBox" type="text" id="body" name="body" placeholder="">
+            <input class="textBox" type="text" id="body" name="body" placeholder="" required>
             <input type="submit" value="update" id="update">
             <!-- <input type="hidden" name="_csrf" value="{{csrfToken}}"> -->
         </form>

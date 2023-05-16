@@ -5,6 +5,8 @@
   "main": "index.js",
   "scripts": {
     "pwd-test": "mocha ./tests/pwd.test.js",
+    "inputSterilisation": "mocha ./tests/inputSterilisation.test.js",
+    "endPointTest": "mocha ./tests/endPoint.test.js",
     "devStart": "nodemon index.js"
   },
   "author": "",
