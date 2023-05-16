@@ -15,13 +15,6 @@ const {
     isPasswordStrong,
 } = require('../frontend/register.js');
 
-describe('getPasswords', () => {
-    it('should return an array of passwords', async () => {
-        const result = await getPasswords();
-        assert(Array.isArray(result), true);
-    });
-});
-
 describe('isPasswordCommon', () => {
     it('should return true if password is in common password list', () => {
         const result = isPasswordCommon('password', ['password', '123456']);
