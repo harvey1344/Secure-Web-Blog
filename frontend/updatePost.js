@@ -11,29 +11,37 @@ const updateRequest=()=>{
 
     title = sanitizeInput(title);
     body = sanitizeInput(body)
+    fetch('/csrf-token', {
+        credentials: 'include' // Include cookies in the request
+      })
+      .then(response => response.json())
+      .then(data => {
+        const csrfToken = data.csrfToken;
 
-   
-    fetch('/blog/updatePost', {
-        // Adding method type
-        method: 'POST',
-        // Adding body or contents to send
-        body: JSON.stringify({
-            title,
-            body,
-            post_id
-        }),
-        // Adding headers to the request
-        headers: {
-            'Content-type': 'application/json; charset=UTF-8',
-        },
-    }).then(res=>{
-        if (res.redirected) {
-            console.log('redirecting to post update');
-            window.location.href = res.url
-        } else {
-            // Registration failed
-            alert("unable to update");
-            
-        }
-    });
-}
+        fetch('/blog/updatePost', {
+            // Adding method type
+            method: 'POST',
+            // Adding body or contents to send
+            body: JSON.stringify({
+                title,
+                body,
+                post_id
+            }),
+            // Adding headers to the request
+            headers: {
+                'Content-type': 'application/json; charset=UTF-8',
+                "X-CSRF-Token": csrfToken,
+                
+            },
+        }).then(res=>{
+            if (res.redirected) {
+                console.log('redirecting to post update');
+                window.location.href = res.url
+            } else {
+                // Registration failed
+                alert("unable to update");
+                
+            }
+        });
+})
+};
