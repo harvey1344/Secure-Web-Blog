@@ -37,7 +37,7 @@ const loginRequest = () => {
           if (!response.ok) {
             return response.text().then(error => { throw new Error(error) });
           }
-          return response.json(); // Parse response as text
+          return response.text(); // Parse response as text
         })
         .then(text => {
           // Handle successful response
