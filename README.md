@@ -1,4 +1,1 @@
-# DSS
-CRUD application in the form of a blog
-Created to demonstrate against common web vulnerabilities 
-For Developing Secure Software
+This project aims to create a secure blog that allows users to create accounts, log into their account, crate posts, edit posts, delete posts and log out. The blog aims to be as secure as possible with multiple security features such as account enuration protecton, sql enjection protection, cross site scripting portection, cross site request forgrey protection session hijacking protectin as well as many other securoty enhancements 
