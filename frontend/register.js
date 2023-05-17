@@ -46,21 +46,26 @@ const getRegistration = async () => {
     const saltedPassword = password + salt;
     const hash = CryptoJS.SHA256(saltedPassword).toString();
     // send user details to database with use of fetch API
-    fetch("/register", {
-        // Adding method type
-        method: "POST",
-        // Adding body or contents to send
-        body: JSON.stringify({
-            name,
-            userName,
-            email,
-            hash,
-            salt,
-        }),
-        // Adding headers to the request
-        headers: {
-            "Content-type": "application/json; charset=UTF-8",
-        },
+    fetch("/csrf-token", {
+        credentials: "include", // Include cookies in the request
+    })
+    .then((response) => response.json())
+    .then((data) => {
+        const csrfToken = data.csrfToken;
+        return fetch("/register", {
+            method: "POST",
+            body: JSON.stringify({
+                name,
+                userName,
+                email,
+                hash,
+                salt,
+            }),
+            headers: {
+                "X-CSRF-Token": csrfToken,
+                "Content-type": "application/json; charset=UTF-8",
+            },
+      })
     })
         .then(function (res) {
             if (!res.ok) {

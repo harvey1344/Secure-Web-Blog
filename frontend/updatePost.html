@@ -5,21 +5,23 @@
     <title>Update Post</title>
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="description" content="" />
+    <meta name="X-CSRF-Token" content="{{csrfToken}}">
     <link rel="stylesheet" href="main.css">
 </head>
 <body>
     <h1>Update Post</h1>
-            <form onsubmit="updateRequest(); return false;">
+        <form onsubmit="updateRequest(); return false;">
             <label htmlfor="title">Title</Title></label>
             <input class="textBox" type="text" id="title" name="title" placeholder="" required>
             <label htmlfor="body">Body</label>
             <input class="textBox" type="text" id="body" name="body" placeholder="" required>
+            <input type="hidden" id="csrfToken" value="">
             <input type="submit" value="update" id="update">
         </form>
 
         <a href="/blog">Cancel</a>    
     
-    <script src="updatePost.js"></script>
+    <script src="./updatePost.js"></script>
     <script src="/inputSterilisation.js"></script>
 </body>
 </html>

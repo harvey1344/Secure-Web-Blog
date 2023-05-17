@@ -7,6 +7,7 @@ const rateLimit = require("express-rate-limit");
 
 require("dotenv").config({ path: "./config.env" });
 
+// CHANGED ../ to  ./
 const dosLimiter = rateLimit({
     windowMs: 1 * 60 * 1000, // 1 minute
     max: 200, // maximum requests per window
