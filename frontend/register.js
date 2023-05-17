@@ -16,6 +16,7 @@ const getPasswords = async () => {
 const getRegistration = async () => {
     // get array of top passwords from function
     let pwdArray = await getPasswords();
+    console.log(typeof pwdArray);
     pwdArray = pwdArray.map((pwd) => pwd.trim());
 
     // get the user details from the form
@@ -42,7 +43,7 @@ const getRegistration = async () => {
     // salt the password before hashing
     // appened salt after pwd
     const salt = generateSalt(10);
-    const saltedPassword = password + salt; // concatenate password and salt
+    const saltedPassword = password + salt;
     const hash = CryptoJS.SHA256(saltedPassword).toString();
     // send user details to database with use of fetch API
 fetch("/csrf-token", {
@@ -69,17 +70,39 @@ fetch("/csrf-token", {
         .then(function (res) {
             if (!res.ok) {
                 // Registration failed
-                alert("User fail");
+                alert(
+                    "Username or email in use. Please check if you allready have an account."
+                );
                 return Promise.reject(new Error("Registration failed"));
             } else {
                 return res.json();
             }
         })
         .then(function (res) {
-            //console.log(res.body)
-            alert("2fa code = " + res.twoFA);
+            code = res.twoFA;
+            alert("2fa code = " + code.toString());
+            console.log(typeof code);
             console.log("Registration successful");
             // Registration successful
+            let qr = qrcode(4, "L");
+            qr.addData(code.toUpperCase());
+            qr.make();
+
+            // Create an image element with the QR code data
+            let imgElement = document.createElement("img");
+            imgElement.src = qr.createDataURL();
+
+            // Set the desired size for the QR code
+            let size = 300; // Adjust the size as per your requirement
+            imgElement.style.width = size + "px";
+            imgElement.style.height = size + "px";
+
+            // Get the container elements
+            let qrContainer = document.getElementById("qr");
+
+            // Append the image to the QR code container
+            qrContainer.appendChild(imgElement);
+
             showSuccessAlert();
         })
         .catch((error) => {
@@ -121,33 +144,28 @@ const isPasswordStrong = (password) => {
 
 function showSuccessAlert() {
     // Show the alert
-    var alertBox = document.getElementById("alert");
+    let alertBox = document.getElementById("alert");
     alertBox.style.display = "block";
 
-    // Hide the alert after 3 seconds
+    // Hide the alert after 2 mins
     setTimeout(function () {
         alertBox.style.display = "none";
         window.location.href = "/";
-    }, 3000);
-}
-
-function closeAlert() {
-    var alertBox = document.getElementById("alert");
-    alertBox.style.display = "none";
+    }, 120000);
 }
 
 const generateSalt = (length) => {
-    var chars =
+    let chars =
         "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    var salt = "";
-    for (var i = 0; i < length; i++) {
+    let salt = "";
+    for (let i = 0; i < length; i++) {
         salt += chars.charAt(Math.floor(Math.random() * chars.length));
     }
     return salt;
 };
 
-function redirectToBlog() {
-    window.location.href = "/blog";
+function redirectToLogin() {
+    window.location.href = "/";
 }
 
 module.exports.getPasswords = getPasswords;

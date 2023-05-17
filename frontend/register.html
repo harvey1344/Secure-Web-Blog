@@ -10,33 +10,45 @@
     <script src="hashing"></script>
     <script src="register.js"></script>
     <script src="/inputSterilisation.js"></script>
-
-
+    <script src="/qr"></script>
 </head>
 
 <body>
     <div id="alert" class="alert" style="display: none;">
         <span class="closebtn" onclick="closeAlert()">&times;</span>
         <strong>Success!</strong> Your registration was successful.
-        <button onclick="redirectToBlog()">Go to Blog</button>
+        <button onclick="redirectToLogin()">Go to Login</button>
       </div>
       
-    <div class="AuthForm">
-        <h1>Register</h1>
-        <form onsubmit="getRegistration(); return false;">
-            <label htmlfor="Name">Name</label>
-            <input class="textBox" type="text" id="Name" name="name" placeholder="">
-            <label htmlfor="userName">User Name</label>
-            <input class="textBox" type="text" id="userName" name="userName" placeholder="">
-            <label htmlfor="email">Email</label>
-            <input class="textBox" type="email" id="email" name="email" placeholder="name@provider.com">
-            <label htmlfor="pasword">Password</label>
-            <input class="textBox" type="password" id="password" name="password" placeholder="******">      
-            <!-- <input type="hidden" name="_csrf" value="{{csrfToken}}">       -->
-            <input type="hidden" name="_csrf" value="{{csrfToken}}">
-            <input type="submit" value="Register" id="Register">
-        </form>
-        <a href="/">Already have an account?</a>
+    <div class="container">
+        <div id="qr"></div>
+        <div id="authform" class="AuthForm">
+            <h1>Register</h1>
+            <form onsubmit="getRegistration(); return false;">
+                <label htmlfor="Name">Name</label>
+                <input class="textBox" type="text" id="Name" name="name" placeholder="" required>
+                <label htmlfor="userName">User Name</label>
+                <input class="textBox" type="text" id="userName" name="userName" placeholder="" required>
+                <label htmlfor="email">Email</label>
+                <input class="textBox" type="email" id="email" name="email" placeholder="name@provider.com" required>
+                <label htmlfor="pasword">Password</label>
+                <input class="textBox" type="password" id="password" name="password" placeholder="******" required>            
+                <input type="hidden" name="_csrf" value="{{csrfToken}}">
+                <input type="submit" value="Register" id="Register">
+            </form>
+            <a href="/">Already have an account?</a>
+        </div>
+        <div class="password-requirements">
+            <h2>Password requirements</h2>
+            <ul>
+                <li>The password must be at least 10 characters long.</li>
+                <li>The password must contain at least one numeric character (0-9).</li>
+                <li>The password must not contain three consecutive repeated characters.</li>
+                <li>The password must not contain a sequence of three or more consecutive digits.</li>
+                <li>please download a reputable 2-factor authentication app from your device's app store, 
+                    follow the setup instructions, and scan the provided QR code to generate time-sensitive codes for login.</li>
+            </ul>
+        </div>        
     </div>
 </body>
 </html>

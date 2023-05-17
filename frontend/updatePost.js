@@ -36,12 +36,15 @@ const updateRequest = () => {
       });
     })
     .then(res => {
-      if (res.redirected) {
+      if (res.ok) {
+        alert("Update successful");
+        window.location.href = "/blog";
+      } else if (res.redirected) {
         console.log('Redirecting to post update');
         window.location.href = res.url;
       } else {
-        // Registration failed
-        alert('Unable to update');
+        // Update failed
+        alert("Unable to update");
       }
     })
     .catch(error => {

@@ -2,6 +2,7 @@ const express = require('express');
 const session = require('express-session');
 const CryptoJS = require('crypto-js');
 const https = require('https');
+const rateLimit = require("express-rate-limit");
 const fs = require('fs');
 require('dotenv').config({ path: './backend/config.env' });
 const path = require('path');
@@ -15,9 +16,9 @@ const blog = require('./blog');
 const { config } = require('dotenv');
 
 // set up server
-const PORT = 5000;
 const app = express();
 const csrfProtection = csrf({ cookie: true });
+
 // middleware
 app.use((req, res, next) => {
     if (req.protocol === 'http') {
@@ -39,16 +40,16 @@ app.use(
             secure: true, // Ensures cookies are only sent over HTTPS
             httpOnly: true, // Prevents client-side JavaScript from accessing the cookie
             sameSite: 'strict', // Restricts the cookie to be sent only with same-site requests
-            maxAge: 60 * 60 * 24, // expiration time 1 day
+            maxAge: 1000 * 60 * 60 * 24, // expiration time 1 day
         },
     })
 );
 
 app.use(csrfProtection);
- app.use((req, res, next) =>{
-     res.setHeader('X-CSRF-Token', req.csrfToken());
-     next();
- })
+app.use((req, res, next) =>{
+    res.setHeader('X-CSRF-Token', req.csrfToken());
+    next();
+})
 
 // express routers
 app.get('/hashing', (req, res) => {
@@ -59,9 +60,7 @@ app.get('/csrf-token', (req, res) => {
 });
 app.use('/', login);
 
-//app.use('/login', csrfProtection, login)
-
-app.use('/blog', checkForIpChange, checkAuthenticated, blog);
+app.use('/blog', checkAuthenticated, blog);
 
 app.get('/main.css', function (req, res) {
     res.sendFile('main.css', { root: './frontend' });
@@ -76,11 +75,9 @@ app.get('/register.js', function (req, res) {
 });
 
 app.get('/login.js', function (req, res) {
-    //res.render('login', {csrfToken: req.csrfToken()});
-    // res.setHeader('CSRF-Token', req.csrfToken());
-    // res.setHeader('csrfToken', req.csrfToken());
     res.sendFile('login.js', { root: './frontend' });
 });
+
 app.get('/csrf-token', (req, res) => {
     res.send(req.csrfToken());
 });
@@ -89,52 +86,69 @@ app.get('/blog.js', (req, res) => {
     res.sendFile('blog.js', { root: './frontend' });
 });
 
-app.get('/toppwd.text', function (req, res) {
-    res.sendFile('100pwd.txt', { root: '../' });
+app.get("/toppwd.text", function (req, res) {
+    res.sendFile("100pwd.txt", { root: "../" });
 });
 
 app.get('/bad', function (req, res) {
     res.sendFile('/bad.html', { root: './frontend' });
 });
 
-app.get('/logout', checkAuthenticated, function(req,res){
-    req.session.destroy((err)=>{
-        if (err){
-            res.status(409).send()
-        }else{
-            res.status(200).send()
+app.get("/logout", checkAuthenticated, function (req, res) {
+    req.session.destroy((err) => {
+        if (err) {
+            res.status(409).send();
+        } else {
+            res.status(200).send();
         }
-    })
-})
-// added csrf
-app.use('/register', users);
+    });
+});
 
-function checkAuthenticated(req, res, next) {
+app.get("/qr", function (req, res) {
+    res.sendFile("qrcode.js", { root: "../frontend" });
+    });
+    
+    app.use('/register', users);
+    
+    function checkAuthenticated(req, res, next) {
     if (req.session.user_id) {
-        next();
+    next();
     } else {
-        console.log("not auth")
-        res.redirect('/');
+    console.log("not auth");
+    res.redirect("/");
     }
-}
-
-function checkForIpChange(req, res, next) {
+    }
+    
+    function checkSessionValidity(req, res, next) {
+    let timeSinceLastRequest = performance.now() - req.session.lastRequest;
     user_ip = CryptoJS.SHA256(req.socket.remoteAddress).toString();
-
-    if (req.session.user_ip == user_ip) {
-        next();
-    } else {
-        console.log("ip changed")
+    if (req.session.user_ip != user_ip) {
+        console.log("ip changed");
         req.session.destroy((err) => {
             if (err) {
-                console.log('error');
+                console.log("error");
             } else {
-                res.redirect('/');
+                res.redirect("/");
             }
         });
+        return;
     }
+    
+    if (timeSinceLastRequest > 1000 * 60 * 60) {
+        // 1 hour
+        console.log("session innactive");
+        req.session.destroy((err) => {
+            if (err) {
+                console.log("error");
+            } else {
+                res.redirect("/");
+            }
+        });
+        return;
+    }
+    req.session.lastRequest = performance.now();
+    next();
 }
-
 // error handling for csrf
 app.use((error, req, res, next) => {
     if (error.code === 'EBADCSRFTOKEN') {
@@ -149,7 +163,6 @@ app.use((error, req, res, next) => {
 });
 app.use((error, req, res, next) => {
     console.error(error);
-
     // (Internal Server Error)
     res.status(500);
     res.send('An error occurred. Please try again later.');
@@ -162,5 +175,5 @@ const httpsOptions = {
 const httpsServer = https.createServer(httpsOptions, app);
 
 httpsServer.listen(5000, () => {
-    console.log('HTTPS server listening on port 5000');
+    console.log("HTTPS server listening on port 5000");
 });
