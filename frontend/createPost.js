@@ -1,26 +1,26 @@
-const createPost=()=>{
-    let title = document.getElementById('title').value;
-    let body = document.getElementById('body').value;
+const createPost = () => {
+    let title = document.getElementById("title").value;
+    let body = document.getElementById("body").value;
 
     // sanititing user input
     title = sanitiseInput(title);
-    body = sanitiseInput(body)
-    
+    body = sanitiseInput(body);
+
     // sending request to edit post
-    fetch('/blog/createPost', {
-        method: 'POST',
+    fetch("/blog/createPost", {
+        method: "POST",
         body: JSON.stringify({
             title,
-            body
+            body,
         }),
         headers: {
-            'Content-type': 'application/json; charset=UTF-8',
+            "Content-type": "application/json; charset=UTF-8",
         },
-    }).then(res=>{
+    }).then((res) => {
         if (res.redirected) {
-            window.location.href = res.url
+            window.location.href = res.url;
         } else {
-            alert("unable to create post");            
+            alert("unable to create post");
         }
     });
-}
+};

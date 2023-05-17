@@ -24,7 +24,7 @@ const getRegistration = async () => {
     let email = document.getElementById("email").value;
     let password = document.getElementById("password").value;
 
-    // sanitise the user inputs 
+    // sanitise the user inputs
     name = sanitiseInput(name);
     userName = sanitiseInput(userName);
     email = sanitiseInput(email);
@@ -95,7 +95,6 @@ const getRegistration = async () => {
         })
         .catch(function (error) {
             // do nothing :-(
-            
         });
 };
 
@@ -104,7 +103,7 @@ const isPasswordCommon = (password, commonPasswords) => {
     return commonPasswords.includes(password);
 };
 
-//using regex to 
+//using regex to
 const isPasswordStrong = (password) => {
     // Check for length
     if (password.length < 10) {

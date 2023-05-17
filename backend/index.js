@@ -1,4 +1,3 @@
-
 const express = require("express");
 const session = require("express-session");
 const CryptoJS = require("crypto-js");
@@ -25,12 +24,10 @@ app.use((req, res, next) => {
     }
 });
 
-
 app.use(express.json());
 
-
 // sets up the sessions middleware to use the secret stored in the .env file,
-// to only send cookies over https, only be accaable via html, only be used on the owners website 
+// to only send cookies over https, only be accaable via html, only be used on the owners website
 // and to expire after one day
 app.use(
     session({

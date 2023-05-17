@@ -8,7 +8,7 @@ const loginRequest = () => {
     password = sanitiseInput(password);
     twoFA = sanitiseInput(twoFA);
 
-    // encrypts the user password for sending 
+    // encrypts the user password for sending
     key = "twoMan!";
     password = CryptoJS.AES.encrypt(password, key).toString();
 
@@ -27,7 +27,7 @@ const loginRequest = () => {
         if (res.ok) {
             showSuccessAlert();
         } else if (res.status === 429) {
-          // handles too many requests
+            // handles too many requests
             alert("Too many attempts, please try again later");
         } else {
             res.json().then(function (data) {

@@ -10,8 +10,8 @@ require("dotenv").config({ path: "./config.env" });
 // uses express-rate-limitm to limit requests to 200 per 1min window
 // if exceeded will destory user session and kick out
 const dosLimiter = rateLimit({
-    windowMs: 1 * 60 * 1000, 
-    max: 100, 
+    windowMs: 1 * 60 * 1000,
+    max: 100,
     handler: (req, res) => {
         console.log("DOS attack detected");
         req.session.destroy((err) => {
@@ -86,7 +86,6 @@ blog.post("/deleteRequest", dosLimiter, async (req, res) => {
     }
 });
 
-
 blog.post("/updateRequest", dosLimiter, async (req, res) => {
     const user_id = Number(req.session.user_id);
     const post_id = Number(req.body.post_id);
@@ -123,37 +122,40 @@ blog.post("/createPost", dosLimiter, async (req, res) => {
     }
 });
 
-blog.post('/updatePost',dosLimiter, async(req,res)=>{
-    const user_id = Number(req.session.user_id)
-    const post_id = Number(req.body.post_id)
+blog.post("/updatePost", dosLimiter, async (req, res) => {
+    const user_id = Number(req.session.user_id);
+    const post_id = Number(req.body.post_id);
 
-
-    data = await database.query(`select user_id from user_data.posts where post_id = $1`,
-    [post_id])
+    data = await database.query(
+        `select user_id from user_data.posts where post_id = $1`,
+        [post_id]
+    );
 
     // updates a post if the user owns it
-    if(data.rows[0].user_id != user_id){  
-        res.status(404).send()
-    }else{    
-        try{
-            await database.query(`update user_data.posts
+    if (data.rows[0].user_id != user_id) {
+        res.status(404).send();
+    } else {
+        try {
+            await database.query(
+                `update user_data.posts
             set title = $1,
             body = $2,
             updated_at = current_date
-            where post_id = $3`,[
-                steraliseInput(req.body.title),
-                steraliseInput(req.body.body),
-                post_id
-            ])
+            where post_id = $3`,
+                [
+                    steraliseInput(req.body.title),
+                    steraliseInput(req.body.body),
+                    post_id,
+                ]
+            );
 
-            res.redirect('/blog')
-        }catch(err){
-            console.error(err)
-            res.status(404).send()
+            res.redirect("/blog");
+        } catch (err) {
+            console.error(err);
+            res.status(404).send();
         }
     }
-})
-
+});
 
 blog.post("/search", dosLimiter, async (req, res) => {
     user_id = req.session.user_id;

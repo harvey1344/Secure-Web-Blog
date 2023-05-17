@@ -29,8 +29,7 @@ user.post("/", jsonParser, async (req, res) => {
     let twoFA = twofactor.generateSecret({
         name: "blog",
         account: email,
-    }).secret; 
-
+    }).secret;
 
     // selects all usernames that match the one provided by the user
     const { rows } = await database.query(
@@ -39,25 +38,28 @@ user.post("/", jsonParser, async (req, res) => {
     );
 
     // selects all users and decrypts them useing the key in the .env account
-    let data = await database.query(`select email_address from user_data.users`)
+    let data = await database.query(
+        `select email_address from user_data.users`
+    );
 
-    let emails = data.rows
+    let emails = data.rows;
     emails = emails.map((email) => {
-        const decryptedEmail = CryptoJS.AES.decrypt(email.email_address, process.env.ENCRYPTION_KEY).toString(CryptoJS.enc.Utf8);
-        email.email_address = decryptedEmail; 
-        return email; 
+        const decryptedEmail = CryptoJS.AES.decrypt(
+            email.email_address,
+            process.env.ENCRYPTION_KEY
+        ).toString(CryptoJS.enc.Utf8);
+        email.email_address = decryptedEmail;
+        return email;
     });
-
 
     // returns an error code if the email or username is allready registers
     if (rows.length > 0) {
         res.status(409).send();
-        return
-    }else if(emails.includes(email)){
+        return;
+    } else if (emails.includes(email)) {
         res.status(409).send();
-        return
+        return;
     }
-
 
     // Inserts the suer data into the database after encryting it with the key in the .env
     await database.query(
@@ -65,11 +67,11 @@ user.post("/", jsonParser, async (req, res) => {
             VALUES ($1, $2, $3, $4, $5, $6)`,
         [
             CryptoJS.AES.encrypt(name, process.env.ENCRYPTION_KEY).toString(),
-            userName,            
+            userName,
             CryptoJS.AES.encrypt(email, process.env.ENCRYPTION_KEY).toString(),
             password,
-            CryptoJS.AES.encrypt(salt, process.env.ENCRYPTION_KEY).toString(),  
-            CryptoJS.AES.encrypt(twoFA, process.env.ENCRYPTION_KEY).toString(),            
+            CryptoJS.AES.encrypt(salt, process.env.ENCRYPTION_KEY).toString(),
+            CryptoJS.AES.encrypt(twoFA, process.env.ENCRYPTION_KEY).toString(),
         ]
     );
     //sends a sucess status if the registraion was sucessfull

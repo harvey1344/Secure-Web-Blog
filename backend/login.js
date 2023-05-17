@@ -70,7 +70,7 @@ login.get("/", (req, res) => {
 
 login.post("/login", loginLimiter, jsonParser, async (req, res) => {
     console.log("Login request received");
-    
+
     // sterilise the user inputs
     let userName = steraliseInput(req.body.userName);
     let password = steraliseInput(req.body.password);
