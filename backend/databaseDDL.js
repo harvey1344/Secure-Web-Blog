@@ -1,12 +1,12 @@
-const { Pool } = require('pg');
+const { Pool } = require("pg");
 
 async function createdb() {
     let database = new Pool({
-        host: 'localhost',
+        host: "localhost",
         port: 5432,
-        database: 'secure_software',
-        user: 'postgres',
-        password: 'password',
+        database: "secure_software",
+        user: "postgres",
+        password: "password",
         max: 20,
         idleTimeoutMillis: 30000,
         connectionTimeoutMillis: 10000,
@@ -15,7 +15,7 @@ async function createdb() {
     try {
         // Drop the schema and cascade if it exists
         await database.query(`DROP SCHEMA IF EXISTS user_data CASCADE`);
-        
+
         // Create the schema
         await database.query(`CREATE SCHEMA user_data`);
 
@@ -50,13 +50,13 @@ async function createdb() {
             )
         `);
 
-        console.log('Schema and tables created successfully.');
+        console.log("Schema and tables created successfully.");
     } catch (error) {
-        console.error('Error creating schema and tables:', error);
+        console.error("Error creating schema and tables:", error);
         process.exit(1); // Exit the script with an error code
     } finally {
         await database.end(); // Close the database connection
-        console.log('Exiting');
+        console.log("Exiting");
         process.exit(0); // Exit the script with a success code
     }
 }

@@ -1,15 +1,15 @@
 const loginRequest = () => {
-    console.log("Sending login request");
-    // send login request to backend
     let userName = document.getElementById("userName").value;
     let password = document.getElementById("password").value;
     let twoFA = document.getElementById("twoFactor").value;
 
-    userName = sanitizeInput(userName);
-    password = sanitizeInput(password);
-    twoFA = sanitizeInput(twoFA);
+    // sanitise user input
+    userName = sanitiseInput(userName);
+    password = sanitiseInput(password);
+    twoFA = sanitiseInput(twoFA);
 
-    key = "Work?";
+    // encrypts the user password for sending
+    key = "twoMan!";
     password = CryptoJS.AES.encrypt(password, key).toString();
 
     // send user details to database with use of fetch API
@@ -51,18 +51,6 @@ const loginRequest = () => {
         .catch(error => {
           console.log("Error:", error);
         });
-function showSuccessAlert() {
-    // Show the alert
-    var alertBox = document.getElementById("alert");
-    alertBox.style.display = "block";
-
-    // Hide the alert after 3 seconds
-    setTimeout(function () {
-        alertBox.style.display = "none";
-        window.location.href = "/blog";
-    }, 2000);
-}}
-
 function showSuccessAlert() {
     // Show the alert
     var alertBox = document.getElementById("alert");

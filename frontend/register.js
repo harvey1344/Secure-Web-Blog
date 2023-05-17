@@ -16,7 +16,6 @@ const getPasswords = async () => {
 const getRegistration = async () => {
     // get array of top passwords from function
     let pwdArray = await getPasswords();
-    console.log(typeof pwdArray);
     pwdArray = pwdArray.map((pwd) => pwd.trim());
 
     // get the user details from the form
@@ -25,10 +24,11 @@ const getRegistration = async () => {
     let email = document.getElementById("email").value;
     let password = document.getElementById("password").value;
 
-    name = sanitizeInput(name);
-    userName = sanitizeInput(userName);
-    email = sanitizeInput(email);
-    password = sanitizeInput(password);
+    // sanitise the user inputs
+    name = sanitiseInput(name);
+    userName = sanitiseInput(userName);
+    email = sanitiseInput(email);
+    password = sanitiseInput(password);
 
     // check if password is common
     if (isPasswordCommon(password, pwdArray)) {
@@ -81,9 +81,6 @@ const getRegistration = async () => {
         .then(function (res) {
             code = res.twoFA;
             alert("2fa code = " + code.toString());
-            console.log(typeof code);
-            console.log("Registration successful");
-            // Registration successful
             let qr = qrcode(4, "L");
             qr.addData(code.toUpperCase());
             qr.make();
@@ -92,8 +89,8 @@ const getRegistration = async () => {
             let imgElement = document.createElement("img");
             imgElement.src = qr.createDataURL();
 
-            // Set the desired size for the QR code
-            let size = 300; // Adjust the size as per your requirement
+            // size for the QR code
+            let size = 300;
             imgElement.style.width = size + "px";
             imgElement.style.height = size + "px";
 
@@ -106,8 +103,7 @@ const getRegistration = async () => {
             showSuccessAlert();
         })
         .catch(function (error) {
-            // Handle the error here
-            //do nothing
+            // do nothing :-(
         });
 };
 
@@ -116,7 +112,7 @@ const isPasswordCommon = (password, commonPasswords) => {
     return commonPasswords.includes(password);
 };
 
-// function to
+//using regex to
 const isPasswordStrong = (password) => {
     // Check for length
     if (password.length < 10) {
@@ -143,7 +139,6 @@ const isPasswordStrong = (password) => {
 };
 
 function showSuccessAlert() {
-    // Show the alert
     let alertBox = document.getElementById("alert");
     alertBox.style.display = "block";
 
