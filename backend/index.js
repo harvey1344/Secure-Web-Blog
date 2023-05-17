@@ -4,8 +4,12 @@ const CryptoJS = require("crypto-js");
 const https = require("https");
 const rateLimit = require("express-rate-limit");
 const fs = require("fs");
+const cookieParser = require('cookie-parser');
+// ADDED backend/
 
 require("dotenv").config({ path: "./config.env" });
+
+const csrf = require('csurf');
 
 const users = require("./users");
 const login = require("./login");
@@ -14,8 +18,10 @@ const { config } = require("dotenv");
 
 // set up server
 const app = express();
-
+const csrfProtection = csrf({ cookie: true });
+//app.use(csurf({ cookie: { sameSite: 'none' } }));
 // middle ware to redirect the user if they make a http request
+
 app.use((req, res, next) => {
     if (req.protocol === "http") {
         res.redirect(`https://${req.hostname}${req.url}`);
@@ -23,7 +29,7 @@ app.use((req, res, next) => {
         next();
     }
 });
-
+app.use(cookieParser());
 app.use(express.json());
 
 // sets up the sessions middleware to use the secret stored in the .env file,
@@ -42,20 +48,28 @@ app.use(
         },
     })
 );
+app.use(csrfProtection);
+app.use((req, res, next) =>{
+    res.setHeader('X-CSRF-Token', req.csrfToken());
+    next();
+});
 
 // express routers
 app.get("/hashing", (req, res) => {
-    res.sendFile("bower_components/crypto-js/crypto-js.js", { root: "../" });
+    // ADDED /DSS/
+    res.sendFile("/bower_components/crypto-js/crypto-js.js", { root: "../" });
 });
 
 app.use("/", login);
 
 app.use("/blog", checkSessionValidity, checkAuthenticated, blog);
-
+// CHANGED ../ to ./
 app.get("/main.css", function (req, res) {
     res.sendFile("main.css", { root: "../frontend" });
 });
-
+app.get('/csrf-token', (req, res) => {
+    res.json({ csrfToken: req.csrfToken() });
+});
 app.get("/inputSterilisation.js", function (req, res) {
     res.sendFile("inputSterilisation.js", { root: "../frontend" });
 });
@@ -73,6 +87,9 @@ app.get("/qr", function (req, res) {
 
 app.get("/blog.js", (req, res) => {
     res.sendFile("blog.js", { root: "../frontend" });
+});
+app.get('/csrf-token', (req, res) => {
+    res.send(req.csrfToken());
 });
 
 app.get("/toppwd.text", function (req, res) {
@@ -141,6 +158,7 @@ function checkSessionValidity(req, res, next) {
 
 // parsing the file loctions for the https certificates
 const httpsOptions = {
+    // ADDED /backend/ to work on mine
     key: fs.readFileSync("./certificates/key.pem"),
     cert: fs.readFileSync("./certificates/cert.pem"),
 };

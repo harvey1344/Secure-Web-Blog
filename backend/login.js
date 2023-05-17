@@ -65,6 +65,8 @@ const loginLimiter = rateLimit({
 
 // send the login page to the client
 login.get("/", (req, res) => {
+    // CHANGED ../
+    res.cookie('XSRF-TOKEN', req.csrfToken());
     res.sendFile("login.html", { root: "../frontend" });
 });
 
