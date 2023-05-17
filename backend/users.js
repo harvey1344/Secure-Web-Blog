@@ -1,5 +1,5 @@
 /*
- * Author: Harvey Thompson
+ * Author: Harvey Thompson Jack Bailey
  * Date: 27/03/2023
  * Description: Backend code for the user registration page.
  */
@@ -17,35 +17,39 @@ user.get("/", (req, res) => {
     res.sendFile("register.html", { root: "../frontend" });
 });
 
+// Gets the infomation from the body and parses it through input steralisation.
 user.post("/", jsonParser, async (req, res) => {
     let name = steraliseInput(req.body.name);
     let userName = steraliseInput(req.body.userName);
     let email = steraliseInput(req.body.email);
     let password = steraliseInput(req.body.hash);
     let salt = req.body.salt;
+
+    // genorating a random 2fa secret
     let twoFA = twofactor.generateSecret({
         name: "blog",
         account: email,
     }).secret; 
 
 
-    // Check if the email already exists in the database
+    // selects all usernames that match the one provided by the user
     const { rows } = await database.query(
         `SELECT * FROM user_data.users WHERE user_name = $1`,
         [userName]
     );
 
-    data = await database.query(`select email_address from user_data.users`)
+    // selects all users and decrypts them useing the key in the .env account
+    let data = await database.query(`select email_address from user_data.users`)
 
-    emails = data.rows
-
+    let emails = data.rows
     emails = emails.map((email) => {
         const decryptedEmail = CryptoJS.AES.decrypt(email.email_address, process.env.ENCRYPTION_KEY).toString(CryptoJS.enc.Utf8);
-        email.email_address = decryptedEmail; // Update the email_address property with the decrypted value
-        return email; // Return the updated email object
+        email.email_address = decryptedEmail; 
+        return email; 
     });
 
 
+    // returns an error code if the email or username is allready registers
     if (rows.length > 0) {
         res.status(409).send();
         return
@@ -55,7 +59,7 @@ user.post("/", jsonParser, async (req, res) => {
     }
 
 
-    // Email address and username are available, insert new record
+    // Inserts the suer data into the database after encryting it with the key in the .env
     await database.query(
         `INSERT INTO user_data.users (name,user_name, email_address, password, salt, twoFA) 
             VALUES ($1, $2, $3, $4, $5, $6)`,
@@ -68,7 +72,7 @@ user.post("/", jsonParser, async (req, res) => {
             CryptoJS.AES.encrypt(twoFA, process.env.ENCRYPTION_KEY).toString(),            
         ]
     );
-    console.log(email, password, "user registered");
+    //sends a sucess status if the registraion was sucessfull
     res.status(200).send(JSON.stringify({ twoFA: twoFA }));
     console.log("Registration successful");
 });

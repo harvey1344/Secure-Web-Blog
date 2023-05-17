@@ -1,31 +1,24 @@
 
 
-
+// checks to a user has the permition to update a post
 function updatePost(user_id,post_id){
     fetch('/blog/updateRequest', {
-        // Adding method type
         method: 'POST',
-        // Adding body or contents to send
         body: JSON.stringify({
             user_id,
             post_id,
         }),
-        // Adding headers to the request
         headers: {
             'Content-type': 'application/json; charset=UTF-8',
         },
     }).then(res=>{
-        console.log(res)
         if (res.ok) {
             if(res.redirected){
-                console.log('redirecting to post update');
                 let url = new URL(res.url)
                 url.searchParams.set('post_id', post_id);
                 window.location.href = url
             }
-            // Registration successful
         } else {
-            // Registration failed
             alert("unable to update");
             
         }
@@ -34,14 +27,11 @@ function updatePost(user_id,post_id){
 
 function deletePost(user_id,post_id){
     fetch('/blog/deleteRequest', {
-        // Adding method type
         method: 'POST',
-        // Adding body or contents to send
         body: JSON.stringify({
             user_id,
             post_id,
         }),
-        // Adding headers to the request
         headers: {
             'Content-type': 'application/json; charset=UTF-8',
         },
@@ -77,6 +67,7 @@ async function getPosts(){
             const postsContainer = document.getElementById("posts-container")
 
             for(let x = 0; x<postData.length;x++){
+                // gets all post data and render it to the page
         
                 const post = document.createElement("div")
                 post.id = postData[x].post_id
@@ -94,9 +85,8 @@ async function getPosts(){
                 body.appendChild(document.createTextNode(postData[x].body))
                 post.appendChild(body)
 
-                // console.log(postData[x].user_id=user_id," ",postData[x].user_id," ",user_id)
-                // console.log(postData[x])
 
+                // adds the edit and delete button to posts the user owns
                 if(postData[x].user_id==user_id){
                     const updateButton = document.createElement('button')
                     updateButton.innerHTML="Edit Post"
@@ -121,24 +111,22 @@ async function getPosts(){
 
 let posts = getPosts()
 
-console.log(posts)
 
 async function searchPosts(){
 
-    searchText = sanitizeInput(document.getElementById("searchBar").value);
+    // sanitises the users input
+    searchText = sanitiseInput(document.getElementById("searchBar").value);
 
     fetch("/blog/search", {
-        // Adding method type
         method: "POST",
-        // Adding body or contents to send
         body: JSON.stringify({searchText}),
-        // Adding headers to the request
         headers: {
             "Content-type": "application/json; charset=UTF-8",
         },
     }).then(res=> {
         return res.json()       
     }).then(data=>{
+        // removes all the posts on screen
         const posts = document.querySelectorAll('.post');
         posts.forEach(post => {
             post.remove();
@@ -148,6 +136,7 @@ async function searchPosts(){
 
         let cancelSearch =  document.getElementById("cancel-search")
         if(!cancelSearch){
+            // removes the calcle search button and requests and renders all posts again
             const cancelSearchContainer = document.getElementById("cancel-container")
             cancelSearch = document.createElement('button')
             cancelSearch.innerHTML="Cancel Search"
@@ -162,6 +151,7 @@ async function searchPosts(){
         const postsContainer = document.getElementById("posts-container")
 
         for(let x = 0; x<postData.length;x++){
+            // gets all the post data and renders them on the site
     
             const post = document.createElement("div")
             post.id = postData[x].post_id
@@ -179,19 +169,16 @@ async function searchPosts(){
             body.appendChild(document.createTextNode(postData[x].body))
             post.appendChild(body)
 
-            // console.log(postData[x].user_id=user_id," ",postData[x].user_id," ",user_id)
-            // console.log(postData[x])
 
+            // adds a edit button to posts
             if(postData[x].user_id==user_id){
                 const updateButton = document.createElement('button')
                 updateButton.innerHTML="Edit Post"
                 updateButton.addEventListener("click", function(){
                     updatePost(postData[x].user_id,postData[x].post_id)
                 })
-                post.appendChild(updateButton)
-
+                post.appendChild(updateButton)        
             }
-        
             postsContainer.appendChild(post)
         }
         return postData

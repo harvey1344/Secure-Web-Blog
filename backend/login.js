@@ -1,5 +1,5 @@
 /*
- * Author: Harvey Thompson Jack BAiley
+ * Author: Harvey Thompson Jack Bailey
  * Date: 27/03/2023
  * Description: Backend code for the login page. User has 5 attempts to login
  *              before being locked out for 10 minutes. On login, the users email address
@@ -23,6 +23,7 @@ let ammountOfReadingsStored = 300;
 let avgPasswordComparison = 1;
 let PasswordComparisonData = [];
 
+// add to password comparison array and calculate the new avrage
 function pushToPasswordComparisonData(element) {
     if (PasswordComparisonData.length === ammountOfReadingsStored) {
         PasswordComparisonData.shift();
@@ -40,6 +41,7 @@ function pushToPasswordComparisonData(element) {
 let avgTwoFa = 1;
 let TwoFaData = [];
 
+// add to 2fa comparison array and calculate the new avrage
 function pushToTwoFaData(element) {
     if (TwoFaData.length === TwoFaData) {
         TwoFaData.shift();
@@ -68,17 +70,16 @@ login.get("/", (req, res) => {
 
 login.post("/login", loginLimiter, jsonParser, async (req, res) => {
     console.log("Login request received");
-
+    
+    // sterilise the user inputs
     let userName = steraliseInput(req.body.userName);
     let password = steraliseInput(req.body.password);
     let twoFA = steraliseInput(req.body.twoFA);
 
-    console.log(userName, password, "username and password");
     //decrypt the password before hashing
-    password = CryptoJS.AES.decrypt(password, "Work?").toString(
+    password = CryptoJS.AES.decrypt(password, "twoMan!").toString(
         CryptoJS.enc.Utf8
     );
-    console.log(password, "decrypted password");
 
     // return the row if the user exits in the database
     const { rows } = await database.query(
@@ -93,33 +94,37 @@ login.post("/login", loginLimiter, jsonParser, async (req, res) => {
 
         setTimeout(() => {
             res.status(404).send({
+                // send a generic error message
                 message: `Details did not match, try again. You have ${attemptsLeft} attempts left.`,
             });
         }, avgTwoFa + avgPasswordComparison);
 
         return;
     }
-
+    // Encrypt the user data before its stored int he database
     const user = rows[0];
     daSalt = CryptoJS.AES.decrypt(
         user.salt,
         process.env.ENCRYPTION_KEY
     ).toString(CryptoJS.enc.Utf8);
+
     daPwd = user.password;
+
     daPwdSalted = password + daSalt;
+
     daHashed = CryptoJS.SHA256(daPwdSalted).toString();
     token = CryptoJS.AES.decrypt(
         user.twofa,
         process.env.ENCRYPTION_KEY
     ).toString(CryptoJS.enc.Utf8);
 
+    // log the time before passowrd comparison
     let timeOne = performance.now();
 
     if (!(daHashed === daPwd)) {
         // handle case when password does not match
-        console.log("password no match");
+        console.log("password no matchy");
         const attemptsLeft = res.getHeader("X-RateLimit-Remaining");
-
         setTimeout(() => {
             res.status(404).send({
                 message: `Details did not match, try again. You have ${attemptsLeft} attempts left.`,
@@ -129,6 +134,7 @@ login.post("/login", loginLimiter, jsonParser, async (req, res) => {
         return;
     }
 
+    // log the time after passowrd comparison
     let timeTwo = performance.now();
 
     if (!twofactor.verifyToken(token, twoFA)) {
@@ -148,7 +154,9 @@ login.post("/login", loginLimiter, jsonParser, async (req, res) => {
     req.session.save();
     res.status(200).send("Login successful");
 
+    // log the time after 2fa comparison
     let timeThree = performance.now();
+    // log the avrage times to complete comparisons
     pushToPasswordComparisonData(timeTwo - timeOne);
     pushToTwoFaData(timeThree - timeTwo);
 });

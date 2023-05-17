@@ -9,7 +9,7 @@ describe('sanitise input', () => {
   });
 
   it('should not modify the input string without HTML tags', () => {
-    const input = 'This is a normal input without any HTML tags.';
+    const input = 'Normal input.';
     const sanitizedInput = steraliseInput(input)
     assert.equal(sanitizedInput, input);
   });

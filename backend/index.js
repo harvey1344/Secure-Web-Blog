@@ -1,9 +1,11 @@
+
 const express = require("express");
 const session = require("express-session");
 const CryptoJS = require("crypto-js");
 const https = require("https");
 const rateLimit = require("express-rate-limit");
 const fs = require("fs");
+
 require("dotenv").config({ path: "./config.env" });
 
 const users = require("./users");
@@ -14,7 +16,7 @@ const { config } = require("dotenv");
 // set up server
 const app = express();
 
-// middleware
+// middle ware to redirect the user if they make a http request
 app.use((req, res, next) => {
     if (req.protocol === "http") {
         res.redirect(`https://${req.hostname}${req.url}`);
@@ -23,8 +25,13 @@ app.use((req, res, next) => {
     }
 });
 
+
 app.use(express.json());
 
+
+// sets up the sessions middleware to use the secret stored in the .env file,
+// to only send cookies over https, only be accaable via html, only be used on the owners website 
+// and to expire after one day
 app.use(
     session({
         secret: process.env.SESSION_SECRET,
@@ -95,13 +102,15 @@ function checkAuthenticated(req, res, next) {
     if (req.session.user_id) {
         next();
     } else {
-        console.log("not auth");
+        console.log("not authenticated");
         res.redirect("/");
     }
 }
 
+// middle ware to check for ip change and inactivity.
 function checkSessionValidity(req, res, next) {
     let timeSinceLastRequest = performance.now() - req.session.lastRequest;
+    // hashing the ip to compare to the hash stored in the session
     user_ip = CryptoJS.SHA256(req.socket.remoteAddress).toString();
 
     if (req.session.user_ip != user_ip) {
@@ -128,10 +137,12 @@ function checkSessionValidity(req, res, next) {
         });
         return;
     }
+    // Setting the last request to the current time
     req.session.lastRequest = performance.now();
     next();
 }
 
+// parsing the file loctions for the https certificates
 const httpsOptions = {
     key: fs.readFileSync("./certificates/key.pem"),
     cert: fs.readFileSync("./certificates/cert.pem"),
