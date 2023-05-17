@@ -1,44 +1,71 @@
-// checks to a user has the permition to update a post
 function updatePost(user_id, post_id) {
-    fetch("/blog/updateRequest", {
-        method: "POST",
-        body: JSON.stringify({
-            user_id,
-            post_id,
-        }),
-        headers: {
-            "Content-type": "application/json; charset=UTF-8",
-        },
-    }).then((res) => {
-        if (res.ok) {
-            if (res.redirected) {
-                let url = new URL(res.url);
-                url.searchParams.set("post_id", post_id);
-                window.location.href = url;
+    fetch('/csrf-token', {
+        credentials: 'include' // Include cookies in the request
+    })
+    .then(response => response.json())
+    .then(data => {
+        const csrfToken = data.csrfToken;
+
+        return fetch('/blog/updateRequest', {
+            // Adding method type
+            method: 'POST',
+            // Adding body or contents to send
+            body: JSON.stringify({
+                user_id,
+                post_id,
+                _csrf: csrfToken // Include the CSRF token in the request body
+            }),
+            // Adding headers to the request
+            headers: {
+                'Content-type': 'application/json; charset=UTF-8',
+            },
+        }).then(res => {
+            console.log(res);
+            if (res.ok) {
+                if (res.redirected) {
+                    console.log('redirecting to post update');
+                    let url = new URL(res.url);
+                    url.searchParams.set('post_id', post_id);
+                    window.location.href = url;
+                }
+                // Registration successful
+            } else {
+                // Registration failed
+                alert("unable to update");
             }
-        } else {
-            alert("unable to update");
-        }
+        });
     });
 }
 
 function deletePost(user_id, post_id) {
-    fetch("/blog/deleteRequest", {
-        method: "POST",
-        body: JSON.stringify({
-            user_id,
-            post_id,
-        }),
-        headers: {
-            "Content-type": "application/json; charset=UTF-8",
-        },
-    }).then((res) => {
-        if (res.ok) {
-            alert("post Deleted");
-            getPosts();
-        } else {
-            alert("an error occured please try again");
-        }
+    fetch('/csrf-token', {
+        credentials: 'include' // Include cookies in the request
+    })
+    .then(response => response.json())
+    .then(data => {
+        const csrfToken = data.csrfToken;
+
+        return fetch('/blog/deleteRequest', {
+            // Adding method type
+            method: 'POST',
+            // Adding body or contents to send
+            body: JSON.stringify({
+                user_id,
+                post_id,
+                _csrf: csrfToken // Include the CSRF token in the request body
+            }),
+            // Adding headers to the request
+            headers: {
+                'Content-type': 'application/json; charset=UTF-8',
+            },
+        }).then(res => {
+            if (res.ok) {
+                alert("Post Deleted");
+                getPosts();
+            } else {
+                alert("An error occurred. Please try again.");
+            }
+        });
     });
 }
 
