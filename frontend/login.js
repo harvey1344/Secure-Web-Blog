@@ -13,44 +13,30 @@ const loginRequest = () => {
     password = CryptoJS.AES.encrypt(password, key).toString();
 
     // send user details to database with use of fetch API
-    fetch('/csrf-token', {
-        credentials: 'include' // Include cookies in the request
-      })
-        .then(response => response.json())
-        .then(data => {
-          const csrfToken = data.csrfToken;
-          return fetch("/login", {
-            method: "POST",
-            body: JSON.stringify({
-              userName,
-              password,
-              twoFA,
-              _csrf: csrfToken // add csrf token to request body
-            }),
-            headers: {
-              "X-CSRF-Token": csrfToken,
-              "Content-type": "application/json; charset=UTF-8",
-            },
-          });
-        })
-        .then(response => {
-          if (!response.ok) {
-            return response.text().then(error => { throw new Error(error) });
-          }
-          return response.text(); // Parse response as text
-        })
-        .then(text => {
-          // Handle successful response
-          if (text === "Login successful") {
-            console.log("Login successful");
+    fetch("/login", {
+        method: "POST",
+        body: JSON.stringify({
+            userName,
+            password,
+            twoFA,
+        }),
+        headers: {
+            "Content-type": "application/json; charset=UTF-8",
+        },
+    }).then(function (res) {
+        if (res.ok) {
             showSuccessAlert();
-          } else {
-            alert(text); // Display the response text as an error message
-          }
-        })
-        .catch(error => {
-          console.log("Error:", error);
-        });
+        } else if (res.status === 429) {
+            // handles too many requests
+            alert("Too many attempts, please try again later");
+        } else {
+            res.json().then(function (data) {
+                alert(data.message);
+            });
+        }
+    });
+};
+
 function showSuccessAlert() {
     // Show the alert
     var alertBox = document.getElementById("alert");
