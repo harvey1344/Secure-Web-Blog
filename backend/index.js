@@ -3,7 +3,7 @@ const session = require('express-session');
 const CryptoJS = require('crypto-js');
 const https = require('https');
 const fs = require('fs');
-require('dotenv').config({ path: './config.env' });
+require('dotenv').config({ path: './backend/config.env' });
 const path = require('path');
 
 const cookieParser = require('cookie-parser');
@@ -52,7 +52,7 @@ app.use(csrfProtection);
 
 // express routers
 app.get('/hashing', (req, res) => {
-    res.sendFile('bower_components/crypto-js/crypto-js.js', { root: '../' });
+    res.sendFile('/DSS/bower_components/crypto-js/crypto-js.js', { root: '../' });
 });
 app.get('/csrf-token', (req, res) => {
     res.json({ csrfToken: req.csrfToken() });
@@ -64,29 +64,29 @@ app.use('/', login);
 app.use('/blog', checkForIpChange, checkAuthenticated, blog);
 
 app.get('/main.css', function (req, res) {
-    res.sendFile('main.css', { root: '../frontend' });
+    res.sendFile('main.css', { root: './frontend' });
 });
 
 app.get('/inputSterilisation.js', function (req, res) {
-    res.sendFile('inputSterilisation.js', { root: '../frontend' });
+    res.sendFile('inputSterilisation.js', { root: './frontend' });
 });
 
 app.get('/register.js', function (req, res) {
-    res.sendFile('register.js', { root: '../frontend' });
+    res.sendFile('register.js', { root: './frontend' });
 });
 
 app.get('/login.js', function (req, res) {
     //res.render('login', {csrfToken: req.csrfToken()});
     // res.setHeader('CSRF-Token', req.csrfToken());
     // res.setHeader('csrfToken', req.csrfToken());
-    res.sendFile('login.js', { root: '../frontend' });
+    res.sendFile('login.js', { root: './frontend' });
 });
 app.get('/csrf-token', (req, res) => {
     res.send(req.csrfToken());
 });
 
 app.get('/blog.js', (req, res) => {
-    res.sendFile('blog.js', { root: '../frontend' });
+    res.sendFile('blog.js', { root: './frontend' });
 });
 
 app.get('/toppwd.text', function (req, res) {
@@ -94,7 +94,7 @@ app.get('/toppwd.text', function (req, res) {
 });
 
 app.get('/bad', function (req, res) {
-    res.sendFile('/bad.html', { root: '../frontend' });
+    res.sendFile('/bad.html', { root: './frontend' });
 });
 
 app.get('/logout', checkAuthenticated, function(req,res){
@@ -155,8 +155,8 @@ app.use((error, req, res, next) => {
     res.send('An error occurred. Please try again later.');
 });
 const httpsOptions = {
-    key: fs.readFileSync('./certificates/key.pem'),
-    cert: fs.readFileSync('./certificates/cert.pem'),
+    key: fs.readFileSync('./backend/certificates/key.pem'),
+    cert: fs.readFileSync('./backend/certificates/cert.pem'),
 };
 
 const httpsServer = https.createServer(httpsOptions, app);
