@@ -61,4 +61,4 @@ function showSuccessAlert() {
         alertBox.style.display = "none";
         window.location.href = "/blog";
     }, 2000);
-}
+}}

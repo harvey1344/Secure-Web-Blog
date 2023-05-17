@@ -2,8 +2,8 @@ const createPost = () => {
     let title = document.getElementById("title").value;
     let body = document.getElementById("body").value;
 
-    title = sanitizeInput(title);
-    body = sanitizeInput(body)
+    title = sanitiseInput(title);
+    body = sanitiseInput(body)
     
     fetch('/csrf-token', {
         credentials: 'include' // Include cookies in the request
