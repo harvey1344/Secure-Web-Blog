@@ -1,12 +1,24 @@
-const database = require("./db");
-const steraliseInput = require("./inputSterilisation");
-const blog = require("express").Router();
-const bodyParser = require("body-parser");
-const CryptoJS = require("crypto-js");
+const express = require('express');
+const session = require('express-session');
+const CryptoJS = require('crypto-js');
+const https = require('https');
+const fs = require('fs');
+require('dotenv').config({ path: './backend/config.env' });
+const path = require('path');
 const rateLimit = require("express-rate-limit");
 
-require("dotenv").config({ path: "./config.env" });
+const cookieParser = require('cookie-parser');
+const csrf = require('csurf');
 
+const users = require('./users');
+const login = require('./login');
+const blog = require('./blog');
+const { config } = require('dotenv');
+
+// set up server
+const PORT = 5000;
+const app = express();
+const csrfProtection = csrf({ cookie: true });
 const dosLimiter = rateLimit({
     windowMs: 1 * 60 * 1000, // 1 minute
     max: 200, // maximum requests per window
@@ -22,142 +34,151 @@ const dosLimiter = rateLimit({
     },
 });
 
-blog.get("/", dosLimiter, (req, res) => {
-    res.sendFile("blog.html", { root: "../frontend" });
-});
-
-blog.get("/updatePost", dosLimiter, (req, res) => {
-    res.sendFile("updatePost.html", { root: "../frontend" });
-});
-
-blog.get("/updatePost.js", dosLimiter, (req, res) => {
-    res.sendFile("updatePost.js", { root: "../frontend" });
-});
-
-blog.get("/createPost", dosLimiter, (req, res) => {
-    res.sendFile("createPost.html", { root: "../frontend" });
-});
-
-blog.get("/createPost.js", dosLimiter, (req, res) => {
-    res.sendFile("createPost.js", { root: "../frontend" });
-});
-
-blog.get("/posts", dosLimiter, async (res, req) => {
-    const user_id = Number(res.session.user_id);
-
-    data = await database.query(`select users.user_name, users.user_id,
-    posts.post_id, posts.user_id, posts.title, posts.body, posts.created_at, posts.updated_at 
-    from user_data.posts 
-    inner join user_data.users on posts.user_id = users.user_id
-    order by created_at`);
-
-    req.send(JSON.stringify((data = { posts: data.rows, id: user_id })));
-});
-
-blog.post("/deleteRequest", dosLimiter, async (req, res) => {
-    const user_id = Number(req.session.user_id);
-    const post_id = Number(req.body.post_id);
-
-    const { rows } = await database.query(
-        `select user_id from user_data.posts where post_id = $1`,
-        [post_id]
-    );
-
-    if (rows[0].user_id != user_id) {
-        res.status(404).send();
-        return;
-    }
-
-    try {
-        await database.query(`delete from user_data.posts where post_id = $1`, [
-            post_id,
-        ]);
-        res.status(200).send();
-        getPosts();
-    } catch (error) {
-        res.status(404).send();
-    }
-});
-blog.post("/updateRequest", dosLimiter, async (req, res) => {
-    const user_id = Number(req.session.user_id);
-    const post_id = Number(req.body.post_id);
-
-    data = await database.query(
-        `select user_id from user_data.posts where post_id = $1`,
-        [post_id]
-    );
-    if (data.rows[0].user_id === user_id) {
-        res.redirect("/blog/updatePost");
+// middleware
+app.use((req, res, next) => {
+    if (req.protocol === 'http') {
+        res.redirect(`https://${req.hostname}${req.url}`);
     } else {
-        res.status(404).send();
+        next();
     }
 });
 
-blog.post("/createPost", dosLimiter, async (req, res) => {
-    try {
-        database.query(
-            `insert into user_data.posts (user_id,title,body,created_at)
-        values ($1,$2,$3,current_date)`,
-            [
-                Number(req.session.user_id),
-                steraliseInput(req.body.title),
-                steraliseInput(req.body.body),
-            ]
-        );
-        res.redirect("/blog");
-    } catch (err) {
-        console.error(err);
-        res.status(404).send();
-    }
+app.use(cookieParser());
+app.use(express.json());
+
+app.use(
+    session({
+        secret: process.env.SESSION_SECRET,
+        resave: false,
+        saveUninitialized: false,
+        cookie: {
+            secure: true, // Ensures cookies are only sent over HTTPS
+            httpOnly: true, // Prevents client-side JavaScript from accessing the cookie
+            sameSite: 'strict', // Restricts the cookie to be sent only with same-site requests
+            maxAge: 60 * 60 * 24, // expiration time 1 day
+        },
+    })
+);
+
+app.use(csrfProtection);
+app.use(dosLimiter);  // rate limit middleware
+
+app.use((req, res, next) =>{
+     res.setHeader('X-CSRF-Token', req.csrfToken());
+     next();
+ })
+
+// express routers
+app.get('/hashing', (req, res) => {
+    res.sendFile('/DSS/bower_components/crypto-js/crypto-js.js', { root: '../' });
+});
+app.get('/csrf-token', (req, res) => {
+    res.json({ csrfToken: req.csrfToken() });
+});
+app.use('/', login);
+
+//app.use('/login', csrfProtection, login)
+
+app.use('/blog', checkForIpChange, checkAuthenticated, blog);
+
+app.get('/main.css', function (req, res) {
+    res.sendFile('main.css', { root: './frontend' });
 });
 
-blog.post('/updatePost',dosLimiter, async(req,res)=>{
-    const user_id = Number(req.session.user_id)
-    const post_id = Number(req.body.post_id)
+app.get('/inputSterilisation.js', function (req, res) {
+    res.sendFile('inputSterilisation.js', { root: './frontend' });
+});
 
+app.get('/register.js', function (req, res) {
+    res.sendFile('register.js', { root: './frontend' });
+});
 
-    data = await database.query(`select user_id from user_data.posts where post_id = $1`,
-    [post_id])
+app.get('/login.js', function (req, res) {
+    //res.render('login', {csrfToken: req.csrfToken()});
+    // res.setHeader('CSRF-Token', req.csrfToken());
+    // res.setHeader('csrfToken', req.csrfToken());
+    res.sendFile('login.js', { root: './frontend' });
+});
+app.get('/csrf-token', (req, res) => {
+    res.send(req.csrfToken());
+});
 
-    if(data.rows[0].user_id != user_id){  
-        res.status(404).send()
-    }else{    
-        try{
-            await database.query(`update user_data.posts
-            set title = $1,
-            body = $2,
-            updated_at = current_date
-            where post_id = $3`,[
-                steraliseInput(req.body.title),
-                steraliseInput(req.body.body),
-                post_id
-            ])
+app.get('/blog.js', (req, res) => {
+    res.sendFile('blog.js', { root: './frontend' });
+});
 
-            res.redirect('/blog')
-        }catch(err){
-            console.log("ran")
-            console.error(err)
-            res.status(404).send()
+app.get('/toppwd.text', function (req, res) {
+    res.sendFile('100pwd.txt', { root: '../' });
+});
+
+app.get('/bad', function (req, res) {
+    res.sendFile('/bad.html', { root: './frontend' });
+});
+
+app.get('/logout', checkAuthenticated, function(req,res){
+    req.session.destroy((err)=>{
+        if (err){
+            res.status(409).send()
+        }else{
+            res.status(200).send()
         }
-    }
+    })
 })
+// added csrf
+app.use('/register', users);
 
-blog.post("/search", dosLimiter, async (req, res) => {
-    user_id = req.session.user_id;
-    searchText = steraliseInput(req.body.searchText);
+function checkAuthenticated(req, res, next) {
+    if (req.session.user_id) {
+        next();
+    } else {
+        console.log("not auth")
+        res.redirect('/');
+    }
+}
 
-    data = await database.query(
-        `
-  SELECT users.user_name, users.user_id, posts.post_id, posts.user_id, posts.title, posts.body, posts.created_at, posts.updated_at
-  FROM user_data.posts
-  INNER JOIN user_data.users ON posts.user_id = users.user_id
-  WHERE posts.title LIKE '%' || $1 || '%' OR posts.body LIKE '%' || $1 || '%'
-  ORDER BY created_at
-`,
-        [searchText]
-    );
+function checkForIpChange(req, res, next) {
+    user_ip = CryptoJS.SHA256(req.socket.remoteAddress).toString();
 
-    res.send(JSON.stringify((data = { posts: data.rows, id: user_id })));
+    if (req.session.user_ip == user_ip) {
+        next();
+    } else {
+        console.log("ip changed")
+        req.session.destroy((err) => {
+            if (err) {
+                console.log('error');
+            } else {
+                res.redirect('/');
+            }
+        });
+    }
+}
+
+// error handling for csrf
+app.use((error, req, res, next) => {
+    if (error.code === 'EBADCSRFTOKEN') {
+        // errors here
+        res.status(403);
+        res.sendFile(path.join(__dirname, '../frontend/bad.html'));
+        console.log(__dirname)
+    } else {
+        // !pass it to the next error handler
+        next(error);
+    }
 });
+app.use((error, req, res, next) => {
+    console.error(error);
 
-module.exports = blog;
+    // (Internal Server Error)
+    res.status(500);
+    res.send('An error occurred. Please try again later.');
+});
+const httpsOptions = {
+    key: fs.readFileSync('./backend/certificates/key.pem'),
+    cert: fs.readFileSync('./backend/certificates/cert.pem'),
+};
+
+const httpsServer = https.createServer(httpsOptions, app);
+
+httpsServer.listen(5000, () => {
+    console.log('HTTPS server listening on port 5000');
+});
