@@ -16,7 +16,7 @@
     "crypto-js": "^4.2.0",
     "dotenv": "^16.0.3",
     "express": "^4.19.2",
-    "express-rate-limit": "^6.7.0",
+    "express-rate-limit": "^7.3.1",
     "express-session": "^1.17.3",
     "fetch": "^1.1.0",
     "fs": "^0.0.1-security",
